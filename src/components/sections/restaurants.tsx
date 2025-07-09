@@ -119,7 +119,7 @@ function Badge({ text }: { text: string }) {
       className="inline-block px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium"
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", stiffness: 400, damping: 10 }}
+      transition={{ type: "spring" as const, stiffness: 400, damping: 10 }}
     >
       {text}
     </motion.span>
@@ -163,7 +163,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
       opacity: 1, 
       y: 0,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 25, // Increased damping for less bounce
         stiffness: 120, // Adjusted stiffness for more elegant motion
         mass: 1.1 // Slightly higher mass for more weight
@@ -172,7 +172,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
     hover: {
       y: -3, // More subtle hover lift
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 30,
         stiffness: 400
       }
@@ -188,7 +188,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 20,
         stiffness: 100,
         delay: 0.2
@@ -198,7 +198,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
       scale: 1.05, // More subtle scale on hover
       rotateZ: 5, // Slight rotation for playful interaction
       transition: {
-        type: "spring",
+        type: "spring" as const,
         damping: 15,
         stiffness: 120
       }
@@ -326,7 +326,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                           initial={{ scale: 0, rotate: -10 }}
                           whileInView={{ scale: 1, rotate: 0 }}
                           transition={{ 
-                            type: "spring", 
+                            type: "spring" as const, 
                             stiffness: 260, 
                             damping: 20, 
                             delay: 0.1 
@@ -351,7 +351,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                           initial={{ scale: 0, rotate: -10 }}
                           whileInView={{ scale: 1, rotate: 0 }}
                           transition={{ 
-                            type: "spring", 
+                            type: "spring" as const, 
                             stiffness: 260, 
                             damping: 20, 
                             delay: 0.2 
@@ -376,7 +376,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                           initial={{ scale: 0, rotate: -10 }}
                           whileInView={{ scale: 1, rotate: 0 }}
                           transition={{ 
-                            type: "spring", 
+                            type: "spring" as const, 
                             stiffness: 260, 
                             damping: 20, 
                             delay: 0.3 
@@ -401,7 +401,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                           initial={{ scale: 0, rotate: -10 }}
                           whileInView={{ scale: 1, rotate: 0 }}
                           transition={{ 
-                            type: "spring", 
+                            type: "spring" as const, 
                             stiffness: 260, 
                             damping: 20, 
                             delay: 0.4 
@@ -447,7 +447,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                         initial={{ scale: 0, rotate: -10 }}
                         whileInView={{ scale: 1, rotate: 0 }}
                         transition={{ 
-                          type: "spring", 
+                          type: "spring" as const, 
                           stiffness: 260, 
                           damping: 20, 
                           delay: 0.5 
