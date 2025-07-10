@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 "use client";
-
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { useState, useEffect, useRef } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { MapPin, Navigation, Globe, Building, Flag, ChevronRight, Clock, Phone } from 'lucide-react';
 
@@ -98,6 +100,76 @@ interface WorldMapProps {
   locale?: string;
 }
 
+// Custom clean map style similar to Google Maps
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const cleanMapStyle = {
+  "version": 8,
+  "name": "Clean Map Style",
+  "sources": {
+    "openmaptiles": {
+      "type": "vector",
+      "url": "https://api.maptiler.com/tiles/v3/tiles.json?key=get_your_own_key"
+    }
+  },
+  "sprite": "https://api.maptiler.com/maps/basic/sprite",
+  "glyphs": "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {
+        "background-color": "#f8f8f8"
+      }
+    },
+    {
+      "id": "water",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "water",
+      "paint": {
+        "fill-color": "#e0f2fe"
+      }
+    },
+    {
+      "id": "boundary_country",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "boundary",
+      "filter": ["==", "admin_level", 2],
+      "paint": {
+        "line-color": "#8d8d8d",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "transportation_road",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "transportation",
+      "filter": ["all", ["==", "$type", "LineString"]],
+      "paint": {
+        "line-color": "#ffffff",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "place_city",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "place",
+      "filter": ["==", "class", "city"],
+      "layout": {
+        "text-field": "{name:latin}",
+        "text-font": ["Open Sans Regular"],
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": "#333333"
+      }
+    }
+  ]
+};
+
 // Helper function to convert string coordinates to [lng, lat]
 const parseCoordinates = (coordString: string): [number, number] => {
   const [lat, lng] = coordString.split(',').map(Number);
@@ -150,8 +222,8 @@ const CustomMarker = ({ country, isActive, onClick }: { country: Country; isActi
 };
 
 // Branch popup component
-
-const BranchPopup = ({ branch, t, onClose }: { branch: Branch; t: TranslationSet; onClose: () => void }) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const BranchPopup = ({ branch, country, t, onClose }: { branch: Branch; country: Country; t: TranslationSet; onClose: () => void }) => {
   function getDirectionsUrl(coordinates: string) {
     return `https://www.google.com/maps/dir/?api=1&destination=${coordinates}`;
   }
@@ -255,7 +327,9 @@ const CountryBranchMarkers = ({ country, selectedBranch, onBranchClick }: { coun
 export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
   // Add CSS for maplibre-gl to the document (client only)
   useEffect(() => {
-    // import 'maplibre-gl/dist/maplibre-gl.css'; // Uncomment if CSS import is needed and works in your setup
+    if (typeof window !== 'undefined') {
+      require('maplibre-gl/dist/maplibre-gl.css');
+    }
   }, []);
 
   // Country data
@@ -454,7 +528,8 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                 {/* Show popup for selected branch */}
                 {selectedBranch && (
                   <BranchPopup 
-                    branch={selectedBranch}
+                    branch={selectedBranch} 
+                    country={selectedCountry!}
                     t={t}
                     onClose={() => setSelectedBranch(null)}
                   />
