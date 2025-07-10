@@ -1,10 +1,18 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { MapPin, Navigation, Globe, Building, Flag, ChevronRight, Clock, Phone } from 'lucide-react';
 
+// Dynamically import map components (client only)
+const Map = dynamic(() => import('react-map-gl/maplibre'), { ssr: false });
+const Marker = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.Marker), { ssr: false });
+const Popup = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.Popup), { ssr: false });
+const NavigationControl = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.NavigationControl), { ssr: false });
+const FullscreenControl = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.FullscreenControl), { ssr: false });
+
+// Map translations
 const translations = {
   en: {
     title: "Our Locations",
@@ -64,6 +72,7 @@ interface Country {
   locations: number;
   flagship: string;
   branches: Branch[];
+  mapCoordinates: [number, number];
 }
 
 interface TranslationSet {
@@ -85,175 +94,102 @@ interface TranslationSet {
   phone: string;
 }
 
-// Country data
-const countryData: Country[] = [
-  { 
-    id: 'iraq', 
-    name: 'Iraq', 
-    position: { top: '37%', right: '48%' }, 
-    scale: 1.0, 
-    delay: 0.3, 
-    status: 'active',
-    locations: 3,
-    flagship: 'Baghdad',
-    branches: [
-      {
-        id: 'branch1',
-        name: 'Shawrma Land Restaurant',
-        address: 'Al-Mouhandseen, Mosul',
-        phone: '+964 123 456 7890',
-        hours: '8:00 AM - 11:00 PM',
-        coordinates: '33.3152, 44.3661'
-      },
-      {
-        id: 'branch2',
-        name: 'Lamassu Restaurant',
-        address: 'Al-Mouhandseen, Mosul',
-        phone: '+964 123 456 7891',
-        hours: '9:00 AM - 10:00 PM',
-        coordinates: '33.3258, 44.4456'
-      },
-      {
-        id: 'branch3',
-        name: 'Start Coffee',
-        address: 'Al-Mouhandseen, Mosul',
-        phone: '+964 123 456 7892',
-        hours: '10:00 AM - 11:00 PM',
-        coordinates: '30.5085, 47.7832'
-      },
-    ]
-  },
-  { 
-    id: 'saudi', 
-    name: 'Saudi Arabia', 
-    position: { top: '56%', right: '50%' }, 
-    scale: 0.9, 
-    delay: 0.5, 
-    status: 'active',
-    locations: 3,
-    flagship: 'Riyadh',
-    branches: [
-      {
-        id: 'saudi1',
-        name: 'Shawrma Land Restaurant',
-        address: 'Kingdom Center, King Fahd Road, Riyadh',
-        phone: '+966 12 345 6789',
-        hours: '9:00 AM - 12:00 AM',
-        coordinates: '24.7111, 46.7243'
-      },
-      {
-        id: 'saudi2',
-        name: 'Lamassu Restaurant',
-        address: 'Corniche Road, Jeddah',
-        phone: '+966 12 345 6780',
-        hours: '8:00 AM - 1:00 AM',
-        coordinates: '21.5169, 39.1653'
-      },
-      {
-        id: 'saudi3',
-        name: 'Start Coffee',
-        address: 'Corniche Road, Dammam',
-        phone: '+966 12 345 6781',
-        hours: '10:00 AM - 11:00 PM',
-        coordinates: '26.4367, 50.1039'
-      }
-    ]
-  }
-];
-
-// CountryMarker component with proper typing
-interface CountryMarkerProps {
-  country: Country;
-  onClick: (country: Country) => void;
+interface WorldMapProps {
+  locale?: string;
 }
 
-function CountryMarker({ country, onClick }: CountryMarkerProps) {
-  const markerSize = country.scale === 1.0 ? "w-6 h-6" : "w-5 h-5";
-  const pulseSize = country.scale === 1.0 ? "w-6 h-6" : "w-5 h-5";
-  
+// Helper function to convert string coordinates to [lng, lat]
+const parseCoordinates = (coordString: string): [number, number] => {
+  const [lat, lng] = coordString.split(',').map(Number);
+  return [lng, lat];
+};
+
+// Custom marker component with animation
+const CustomMarker = ({ country, isActive, onClick }: { country: Country; isActive: boolean; onClick: (country: Country) => void }) => {
   return (
-    <div 
-      className="absolute z-10 transform -translate-x-1/2 -translate-y-1/2" 
-      style={{ 
-        top: country.position.top, 
-        right: country.position.right 
-      }}
+    <Marker 
+      longitude={country.mapCoordinates[0]}
+      latitude={country.mapCoordinates[1]}
+      anchor="bottom"
     >
-      <motion.div 
-        className="relative cursor-pointer"
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+      <motion.div
+        className="cursor-pointer"
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ 
+          scale: isActive ? 1.2 : 1, 
+          opacity: 1 
+        }}
         transition={{ 
           type: "spring", 
           stiffness: 260, 
-          damping: 20, 
-          delay: country.delay 
+          damping: 20,
+          delay: country.delay * 0.1
         }}
         onClick={() => onClick(country)}
       >
-        <div className={`${pulseSize} rounded-full bg-amber-500 animate-ping absolute opacity-75`}></div>
-        <div className={`${markerSize} rounded-full relative flex items-center justify-center bg-amber-500`}>
-          <div className="w-2 h-2 bg-white rounded-full"></div>
-        </div>
-        <motion.div 
-          className="absolute top-full mt-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md whitespace-nowrap transform -translate-x-1/4 shadow-lg z-20"
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: country.delay + 0.2 }}
-        >
-          <div className="flex items-center">
-            {country.name}
-            <span className="ml-1 font-normal">({country.locations})</span>
+        <div className={`absolute w-12 h-12 rounded-full bg-amber-500/50 animate-ping ${isActive ? 'opacity-70' : 'opacity-40'}`}></div>
+        <div className="relative flex flex-col items-center">
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isActive ? 'bg-amber-600' : 'bg-amber-500'}`}>
+            <MapPin className="w-5 h-5 text-white" />
           </div>
-        </motion.div>
+          <motion.div 
+            className="absolute top-full mt-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md whitespace-nowrap transform -translate-x-1/4 shadow-lg z-20"
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: country.delay * 0.1 + 0.2 }}
+          >
+            <div className="flex items-center">
+              {country.name}
+              <span className="ml-1 font-normal">({country.locations})</span>
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
-    </div>
+    </Marker>
   );
-}
+};
 
-// Branch card component with proper typing
-interface BranchCardProps {
-  branch: Branch;
-  t: TranslationSet;
-}
+// Branch popup component
 
-function BranchCard({ branch, t }: BranchCardProps) {
+const BranchPopup = ({ branch, t, onClose }: { branch: Branch; t: TranslationSet; onClose: () => void }) => {
   function getDirectionsUrl(coordinates: string) {
     return `https://www.google.com/maps/dir/?api=1&destination=${coordinates}`;
   }
-  
   return (
-    <motion.div
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <Popup
+      longitude={parseCoordinates(branch.coordinates)[0]}
+      latitude={parseCoordinates(branch.coordinates)[1]}
+      anchor="bottom"
+      closeButton={true}
+      closeOnClick={false}
+      onClose={onClose}
+      className="z-50"
+      offset={25}
     >
-      <div className="p-5">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{branch.name}</h3>
-        
-        <div className="space-y-3 text-sm">
+      <div className="p-3 max-w-sm">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">{branch.name}</h3>
+        <div className="space-y-2 text-sm">
           <div className="flex items-start">
             <MapPin className="w-4 h-4 text-amber-500 mt-0.5 mr-2 flex-shrink-0" />
             <div>
-              <div className="text-gray-500 dark:text-gray-400 font-medium">{t.address}</div>
-              <div className="text-gray-700 dark:text-gray-300">{branch.address}</div>
+              <div className="text-gray-500 font-medium">{t.address}</div>
+              <div className="text-gray-700">{branch.address}</div>
             </div>
           </div>
           
           <div className="flex items-center">
             <Clock className="w-4 h-4 text-amber-500 mr-2 flex-shrink-0" />
             <div>
-              <div className="text-gray-500 dark:text-gray-400 font-medium">{t.openingHours}</div>
-              <div className="text-gray-700 dark:text-gray-300">{branch.hours}</div>
+              <div className="text-gray-500 font-medium">{t.openingHours}</div>
+              <div className="text-gray-700">{branch.hours}</div>
             </div>
           </div>
           
           <div className="flex items-center">
             <Phone className="w-4 h-4 text-amber-500 mr-2 flex-shrink-0" />
             <div>
-              <div className="text-gray-500 dark:text-gray-400 font-medium">{t.phone}</div>
-              <div className="text-gray-700 dark:text-gray-300">{branch.phone}</div>
+              <div className="text-gray-500 font-medium">{t.phone}</div>
+              <div className="text-gray-700">{branch.phone}</div>
             </div>
           </div>
         </div>
@@ -263,7 +199,7 @@ function BranchCard({ branch, t }: BranchCardProps) {
             href={getDirectionsUrl(branch.coordinates)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-amber-600 dark:text-amber-500 font-medium"
+            className="inline-flex items-center text-amber-600 font-medium"
             whileTap={{ scale: 0.97 }}
           >
             <Navigation className="w-4 h-4 mr-1" />
@@ -271,26 +207,182 @@ function BranchCard({ branch, t }: BranchCardProps) {
           </motion.a>
         </div>
       </div>
-    </motion.div>
+    </Popup>
   );
-}
+};
 
-interface WorldMapProps {
-  locale?: string;
-}
+// Country branch marker component
+const CountryBranchMarkers = ({ country, selectedBranch, onBranchClick }: { country: Country; selectedBranch: Branch | null; onBranchClick: (branch: Branch) => void }) => {
+  return (
+    <>
+      {country.branches.map((branch: Branch) => {
+        const [lng, lat] = parseCoordinates(branch.coordinates);
+        const isSelected = selectedBranch?.id === branch.id;
+        return (
+          <Marker
+            key={branch.id}
+            longitude={lng}
+            latitude={lat}
+            anchor="bottom"
+          >
+            <motion.div
+              className="cursor-pointer"
+              initial={{ scale: 0.8, y: -10, opacity: 0 }}
+              animate={{ 
+                scale: isSelected ? 1.2 : 1, 
+                y: 0,
+                opacity: 1 
+              }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 260, 
+                damping: 20,
+                delay: 0.1
+              }}
+              onClick={() => onBranchClick(branch)}
+            >
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-amber-600' : 'bg-amber-500'}`}>
+                <Building className="w-4 h-4 text-white" />
+              </div>
+            </motion.div>
+          </Marker>
+        );
+      })}
+    </>
+  );
+};
 
-export default function WorldMap({ locale = 'en' }: WorldMapProps) {
-  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
-  
-  // Use the locale prop directly instead of accessing document
+export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
+  // Add CSS for maplibre-gl to the document (client only)
+  useEffect(() => {
+    // import 'maplibre-gl/dist/maplibre-gl.css'; // Uncomment if CSS import is needed and works in your setup
+  }, []);
+
+  // Country data
+  const countryData: Country[] = [
+    {
+      id: 'iraq',
+      name: 'Iraq',
+      position: { top: '37%', right: '48%' },
+      scale: 1.0,
+      delay: 0.3,
+      status: 'active',
+      locations: 3,
+      flagship: 'Baghdad',
+      branches: [
+        {
+          id: 'branch1',
+          name: 'Shawrma Land Restaurant',
+          address: '36.3692944, 43.1416558',
+          phone: '+964 123 456 7890',
+          hours: '8:00 AM - 11:00 PM',
+          coordinates: '36.3692944, 43.1416558'
+        },
+        {
+          id: 'branch2',
+          name: 'Lamassu Restaurant',
+          address: '36.3644714, 43.1464652',
+          phone: '+964 123 456 7891',
+          hours: '9:00 AM - 10:00 PM',
+          coordinates: '36.3644714, 43.1464652'
+        },
+        {
+          id: 'branch3',
+          name: 'Start Coffee',
+          address: 'Presidency of the Nineveh Federal Court of Appeal, Mosul',
+          phone: '+964 123 456 7892',
+          hours: '10:00 AM - 11:00 PM',
+          coordinates: '36.342818, 43.1574593'
+        },
+      ],
+      mapCoordinates: [44.3661, 33.3152],
+    },
+    {
+      id: 'saudi',
+      name: 'Saudi Arabia',
+      position: { top: '56%', right: '50%' },
+      scale: 0.9,
+      delay: 0.5,
+      status: 'active',
+      locations: 3,
+      flagship: 'Riyadh',
+      branches: [
+        {
+          id: 'saudi1',
+          name: 'Shawrma Land Restaurant',
+          address: 'Kingdom Center, King Fahd Road, Riyadh',
+          phone: '+966 12 345 6789',
+          hours: '9:00 AM - 12:00 AM',
+          coordinates: '24.7111, 46.7243'
+        },
+        {
+          id: 'saudi2',
+          name: 'Lamassu Restaurant',
+          address: 'Corniche Road, Jeddah',
+          phone: '+966 12 345 6780',
+          hours: '8:00 AM - 1:00 AM',
+          coordinates: '21.5169, 39.1653'
+        },
+        {
+          id: 'saudi3',
+          name: 'Start Coffee',
+          address: 'Corniche Road, Dammam',
+          phone: '+966 12 345 6781',
+          hours: '10:00 AM - 11:00 PM',
+          coordinates: '26.4367, 50.1039'
+        }
+      ],
+      mapCoordinates: [46.7243, 24.7111],
+    }
+  ];
+
   const t = translations[locale as keyof typeof translations] || translations.en;
+  const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+  const [viewState, setViewState] = useState({
+    longitude: 45,
+    latitude: 28,
+    zoom: 3.5,
+    bearing: 0,
+    pitch: 0
+  });
+
+  useEffect(() => {
+    setSelectedBranch(null);
+  }, [selectedCountry]);
 
   const handleCountryClick = (country: Country) => {
     setSelectedCountry(country);
+    const [lng, lat] = country.mapCoordinates;
+    setViewState({
+      ...viewState,
+      longitude: lng,
+      latitude: lat,
+      zoom: 5
+    });
+  };
+
+  const handleBranchClick = (branch: Branch) => {
+    setSelectedBranch(branch);
+    const [lng, lat] = parseCoordinates(branch.coordinates);
+    setViewState({
+      ...viewState,
+      longitude: lng,
+      latitude: lat,
+      zoom: 12
+    });
   };
 
   const handleBackClick = () => {
+    setSelectedBranch(null);
     setSelectedCountry(null);
+    setViewState({
+      longitude: 45,
+      latitude: 28,
+      zoom: 3.5,
+      bearing: 0,
+      pitch: 0
+    });
   };
 
   return (
@@ -328,54 +420,69 @@ export default function WorldMap({ locale = 'en' }: WorldMapProps) {
           </motion.p>
         </div>
 
-        {!selectedCountry ? (
-          // Map view
-          <div className="flex flex-col lg:flex-row gap-8">
-            <div className="w-full lg:w-2/3">
-              <div className="relative w-full h-[400px] md:h-[500px] bg-gray-200 dark:bg-gray-800 rounded-xl overflow-hidden shadow-xl">
-                {/* Middle East map background */}
-                <motion.div 
-                  className="absolute inset-0"
-                  initial={{ opacity: 0, scale: 1.05 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 1 }}
-                  viewport={{ once: true }}
-                >
-                  <Image 
-                    src="/images/world-map/world-map.png" 
-                    alt="Middle East Map"
-                    fill
-                    className="object-cover opacity-90 dark:opacity-70" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-white/60 dark:from-gray-900/50 dark:to-gray-900/80"></div>
-                </motion.div>
-
-                {/* Country markers - only Iraq and Saudi Arabia */}
-                {countryData.map(country => (
-                  <CountryMarker 
-                    key={country.id} 
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className="w-full lg:w-2/3">
+            <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl">
+              {/* Interactive Map */}
+              <Map
+                {...viewState}
+                onMove={evt => setViewState(evt.viewState)}
+                mapStyle="https://api.maptiler.com/maps/basic-v2/style.json?key=mUozmEO28XDI7F1BKx1o"
+                reuseMaps
+                attributionControl={false}
+                style={{ width: '100%', height: '100%' }}
+              >
+                {/* Show country markers in overview mode */}
+                {!selectedCountry && countryData.map(country => (
+                  <CustomMarker 
+                    key={country.id}
                     country={country}
+                    isActive={false}
                     onClick={handleCountryClick}
                   />
                 ))}
-
-                {/* Instructions */}
-                <motion.div 
-                  className="absolute bottom-6 left-6 bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
-                  viewport={{ once: true }}
+                
+                {/* Show branch markers when a country is selected */}
+                {selectedCountry && (
+                  <CountryBranchMarkers 
+                    country={selectedCountry}
+                    selectedBranch={selectedBranch}
+                    onBranchClick={handleBranchClick}
+                  />
+                )}
+                
+                {/* Show popup for selected branch */}
+                {selectedBranch && (
+                  <BranchPopup 
+                    branch={selectedBranch}
+                    t={t}
+                    onClose={() => setSelectedBranch(null)}
+                  />
+                )}
+                
+                {/* Controls */}
+                <NavigationControl position="top-right" />
+                <FullscreenControl position="top-right" />
+              </Map>
+              
+              {/* Back button */}
+              {selectedCountry && (
+                <motion.button
+                  className="absolute top-4 left-4 z-20 flex items-center text-gray-800 bg-white px-3 py-2 rounded-md shadow-md font-medium"
+                  onClick={handleBackClick}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <div className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
-                    <MapPin className="w-4 h-4 text-amber-500 mr-2" />
-                    Click on a location to see branches
-                  </div>
-                </motion.div>
-
-                {/* Global stats */}
+                  <ChevronRight className="w-5 h-5 mr-1 rotate-180" />
+                  {t.back}
+                </motion.button>
+              )}
+              
+              {/* Map Stats */}
+              {!selectedCountry && (
                 <motion.div 
-                  className="absolute top-6 right-6 bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg"
+                  className="absolute top-4 right-16 bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg"
                   initial={{ opacity: 0, x: 20 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8 }}
@@ -398,110 +505,107 @@ export default function WorldMap({ locale = 'en' }: WorldMapProps) {
                     </div>
                   </div>
                 </motion.div>
-              </div>
+              )}
             </div>
-            
-            <div className="w-full lg:w-1/3">
-              <motion.div
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 h-full"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                viewport={{ once: true }}
-              >
-                <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
-                  <MapPin className="w-5 h-5 mr-2 text-amber-500" />
-                  {t.countriesWithPresence}
-                </h3>
-                
-                <div className="space-y-4">
-                  {countryData.map((country, index) => (
-                    <motion.div
-                      key={country.id}
-                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer"
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 * index }}
-                      viewport={{ once: true }}
-                      onClick={() => handleCountryClick(country)}
-                    >
-                      <div className="flex items-center">
-                        <div className="w-3 h-3 rounded-full bg-amber-500 mr-3"></div>
-                        <span className="font-medium text-gray-900 dark:text-white">{country.name}</span>
-                      </div>
-                      <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
-                        <span className="font-bold">{country.locations}</span>
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="mt-8">
-                  <div className="p-4 border border-amber-200 dark:border-amber-800 rounded-lg bg-amber-50 dark:bg-amber-900/20">
-                    <h4 className="font-bold text-amber-700 dark:text-amber-400 mb-2 flex items-center">
-                      <Building className="w-4 h-4 mr-2" />
-                      {t.mainHubs}
-                    </h4>
-                    
-                    <div className="space-y-3">
-                      {countryData.map(country => (
-                        <div key={country.id} className="flex items-start">
-                          <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 mr-2"></div>
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">{country.name}</div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400">{country.flagship}</div>
-                          </div>
+          </div>
+          
+          <div className="w-full lg:w-1/3">
+            <motion.div
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 h-full"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              viewport={{ once: true }}
+            >
+              {!selectedCountry ? (
+                // Country list
+                <>
+                  <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                    <MapPin className="w-5 h-5 mr-2 text-amber-500" />
+                    {t.countriesWithPresence}
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    {countryData.map((country, index) => (
+                      <motion.div
+                        key={country.id}
+                        className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg cursor-pointer"
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 * index }}
+                        viewport={{ once: true }}
+                        onClick={() => handleCountryClick(country)}
+                      >
+                        <div className="flex items-center">
+                          <div className="w-3 h-3 rounded-full bg-amber-500 mr-3"></div>
+                          <span className="font-medium text-gray-900 dark:text-white">{country.name}</span>
                         </div>
-                      ))}
+                        <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
+                          <span className="font-bold">{country.locations}</span>
+                          <ChevronRight className="w-4 h-4 ml-1" />
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8">
+                    <div className="p-4 border border-amber-200 dark:border-amber-800 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                      <h4 className="font-bold text-amber-700 dark:text-amber-400 mb-2 flex items-center">
+                        <Building className="w-4 h-4 mr-2" />
+                        {t.mainHubs}
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        {countryData.map(country => (
+                          <div key={country.id} className="flex items-start">
+                            <div className="w-2 h-2 rounded-full bg-amber-500 mt-1.5 mr-2"></div>
+                            <div>
+                              <div className="font-medium text-gray-900 dark:text-white">{country.name}</div>
+                              <div className="text-sm text-gray-600 dark:text-gray-400">{country.flagship}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        ) : (
-          // Country branches view
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <motion.button
-                className="flex items-center text-gray-600 dark:text-gray-400 font-medium"
-                onClick={handleBackClick}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ChevronRight className="w-5 h-5 mr-1 rotate-180" />
-                {t.back}
-              </motion.button>
-              
-              <motion.div 
-                className="flex items-center text-xl font-bold text-amber-600 dark:text-amber-500"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <Flag className="w-5 h-5 mr-2" />
-                {selectedCountry.name} - {t.branches}
-              </motion.div>
-            </div>
-            
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              {selectedCountry.branches.map((branch) => (
-                <BranchCard 
-                  key={branch.id} 
-                  branch={branch} 
-                  t={t} 
-                />
-              ))}
+                </>
+              ) : (
+                // Branch list for selected country
+                <>
+                  <div className="flex items-center mb-6">
+                    <Flag className="w-5 h-5 mr-2 text-amber-500" />
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {selectedCountry.name} - {t.branches}
+                    </h3>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    {selectedCountry.branches.map((branch, index) => (
+                      <motion.div
+                        key={branch.id}
+                        className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                          selectedBranch?.id === branch.id 
+                            ? 'bg-amber-100 dark:bg-amber-900/30' 
+                            : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                        }`}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                        onClick={() => handleBranchClick(branch)}
+                      >
+                        <div className="font-bold text-gray-900 dark:text-white mb-1">{branch.name}</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+                          <MapPin className="w-3 h-3 mr-1 text-amber-500" />
+                          {branch.address}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </>
+              )}
             </motion.div>
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

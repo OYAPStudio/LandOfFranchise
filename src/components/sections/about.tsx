@@ -83,54 +83,54 @@ export default function About({ locale = 'en' }: AboutProps) {
     <section id="about" className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white overflow-hidden">
       <div className="flex flex-col md:flex-row">
         {/* Left column - Image with parallax effect */}
-        <div className="md:w-1/2 relative h-[500px] md:h-auto overflow-hidden">
+        <div className="w-full md:w-1/2 relative aspect-[4/3] min-h-[300px] md:min-h-0 overflow-hidden flex items-center justify-center">
           <motion.div
             initial={{ scale: 1.1 }}
             whileInView={{ scale: 1 }}
             transition={{ duration: 1.5 }}
             viewport={{ once: true }}
-            className="h-full w-full absolute"
+            className="h-full w-full relative flex items-center justify-center"
           >
             <Image
               src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
               alt="Traditional Iraqi restaurant interior"
               fill
-              className="object-cover"
+              className="object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-white/70 to-transparent dark:from-gray-900/70"></div>
           </motion.div>
           
           {/* Text overlay on the image */}
-          <div className="absolute bottom-0 left-0 right-0 p-10 text-gray-800 dark:text-gray-200">
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 text-gray-800 dark:text-gray-200">
             <motion.div 
-              className="grid grid-cols-2 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <div className="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-6 rounded-lg">
+              <div className="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-3 sm:p-6 rounded-lg">
                 <div className="flex items-center mb-2">
                   <AnimatedIcon icon={Building} />
-                  <h3 className="text-lg font-bold uppercase tracking-wider">{t.headquarters}</h3>
+                  <h3 className="text-sm sm:text-lg font-bold uppercase tracking-wider">{t.headquarters}</h3>
                 </div>
-                <p className="text-2xl font-light">Mosul, Iraq</p>
+                <p className="text-base sm:text-2xl font-light break-words">Mosul, Iraq</p>
               </div>
-              <div className="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-6 rounded-lg">
+              <div className="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-3 sm:p-6 rounded-lg">
                 <div className="flex items-center mb-2">
                   <AnimatedIcon icon={Calendar} delay={0.1} />
-                  <h3 className="text-lg font-bold uppercase tracking-wider">{t.founded}</h3>
+                  <h3 className="text-sm sm:text-lg font-bold uppercase tracking-wider">{t.founded}</h3>
                 </div>
-                <p className="text-2xl font-light">2018</p>
+                <p className="text-base sm:text-2xl font-light break-words">2018</p>
               </div>
             </motion.div>
           </div>
         </div>
         
         {/* Right column - Content */}
-        <div className="md:w-1/2 p-10 md:p-16 bg-white dark:bg-gray-900">
+        <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-16 bg-white dark:bg-gray-900">
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white"
+            className="text-2xl sm:text-3xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -191,7 +191,7 @@ export default function About({ locale = 'en' }: AboutProps) {
                 <AnimatedIcon icon={Heart} delay={0.3} />
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.values}</h3>
               </div>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {companyInfo.values.map((value, index) => (
                   <motion.li 
                     key={index}

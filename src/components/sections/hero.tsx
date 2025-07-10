@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { companyInfo } from '@/lib/mock-data';
@@ -134,9 +134,36 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   const slideInterval = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isAutoplayEnabled = useRef(true);
-  
   // Use locale prop directly instead of accessing document
   const currentLocale = (locale in slideshowContent) ? locale as keyof typeof slideshowContent : 'en';
+  const slides = slideshowContent[currentLocale] || slideshowContent.en;
+  const t = translations[currentLocale] || translations.en;
+  const currentContent = slides[currentSlide] || slides[0];
+
+  // Move goToNextSlide above startSlideTimer
+  const goToNextSlide = useCallback((manual = true) => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setSlideDirection(1); // Right direction
+    setPrevSlide(currentSlide);
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setIsManualChange(manual);
+  }, [isAnimating, currentSlide, slides.length]);
+
+  const startSlideTimer = useCallback(() => {
+    // Clear existing interval if any
+    if (slideInterval.current) {
+      clearInterval(slideInterval.current);
+    }
+    // If the slide was changed manually, reset after a longer delay to allow viewing
+    const delay = isManualChange ? 8000 : 5000;
+    // Set new interval
+    slideInterval.current = setInterval(() => {
+      if (!isAnimating && isAutoplayEnabled.current) {
+        goToNextSlide(false); // false means it's not a manual change
+      }
+    }, delay);
+  }, [isManualChange, isAnimating, goToNextSlide]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -157,29 +184,24 @@ export default function Hero({ locale = 'en' }: HeroProps) {
           setSlideDirection(newDirection);
         }
       }
-      
       setPrevSlide(currentSlide);
     }
-    
     // Set up automatic slide transition
     if (isMounted) {
       startSlideTimer();
     }
-    
     return () => {
       if (slideInterval.current) {
         clearInterval(slideInterval.current);
       }
     };
-  }, [currentSlide, prevSlide, slideDirection, currentLocale, isMounted]);
+  }, [currentSlide, prevSlide, slideDirection, currentLocale, isMounted, slides.length, startSlideTimer]);
 
   // Ensure autoplay continues
   useEffect(() => {
     if (!isMounted) return;
-
     // Start autoplay when component mounts
     startSlideTimer();
-    
     // Add event listeners to pause autoplay when user interacts with the page
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -190,23 +212,19 @@ export default function Hero({ locale = 'en' }: HeroProps) {
         startSlideTimer();
       }
     };
-    
     const handleFocus = () => {
       isAutoplayEnabled.current = true;
       startSlideTimer();
     };
-    
     const handleBlur = () => {
       isAutoplayEnabled.current = false;
       if (slideInterval.current) {
         clearInterval(slideInterval.current);
       }
     };
-    
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
     window.addEventListener('blur', handleBlur);
-    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
@@ -215,12 +233,11 @@ export default function Hero({ locale = 'en' }: HeroProps) {
         clearInterval(slideInterval.current);
       }
     };
-  }, [isMounted]);
+  }, [isMounted, startSlideTimer]);
 
   // Fix for video playback
   useEffect(() => {
     if (!isMounted) return;
-
     // If the current slide is a video, ensure it plays
     if (slides[currentSlide]?.type === 'video' && videoRef.current) {
       const playVideo = async () => {
@@ -228,7 +245,6 @@ export default function Hero({ locale = 'en' }: HeroProps) {
           // Try to load and play the video
           await videoRef.current?.load();
           const playPromise = videoRef.current?.play();
-          
           // Handle the play promise to avoid DOMException
           if (playPromise !== undefined) {
             playPromise
@@ -245,27 +261,9 @@ export default function Hero({ locale = 'en' }: HeroProps) {
           console.error('Error starting video:', error);
         }
       };
-      
       playVideo();
     }
-  }, [currentSlide, currentLocale, isMounted]);
-
-  const startSlideTimer = () => {
-    // Clear existing interval if any
-    if (slideInterval.current) {
-      clearInterval(slideInterval.current);
-    }
-    
-    // If the slide was changed manually, reset after a longer delay to allow viewing
-    const delay = isManualChange ? 8000 : 5000;
-    
-    // Set new interval
-    slideInterval.current = setInterval(() => {
-      if (!isAnimating && isAutoplayEnabled.current) {
-        goToNextSlide(false); // false means it's not a manual change
-      }
-    }, delay);
-  };
+  }, [currentSlide, currentLocale, isMounted, slides]);
 
   const goToSlide = (index: number) => {
     if (isAnimating || index === currentSlide) return;
@@ -299,16 +297,6 @@ export default function Hero({ locale = 'en' }: HeroProps) {
     setIsManualChange(true);
   };
 
-  const goToNextSlide = (manual = true) => {
-    if (isAnimating) return;
-    
-    setIsAnimating(true);
-    setSlideDirection(1); // Right direction
-    setPrevSlide(currentSlide);
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-    setIsManualChange(manual);
-  };
-
   const handleAnimationComplete = () => {
     setIsAnimating(false);
   };
@@ -316,10 +304,6 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   if (!isMounted) {
     return null; // Prevent server-side rendering mismatch
   }
-
-  const t = translations[currentLocale] || translations.en;
-  const slides = slideshowContent[currentLocale] || slideshowContent.en;
-  const currentContent = slides[currentSlide] || slides[0];
 
   return (
     <section id="home" className="relative w-full h-screen overflow-hidden">
