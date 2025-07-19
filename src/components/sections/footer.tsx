@@ -40,15 +40,24 @@ const translations = {
   }
 };
 
-export default function Footer() {
+interface FooterProps {
+  locale?: string;
+}
+
+export default function Footer({ locale: propLocale }: FooterProps = {}) {
   const [locale, setLocale] = useState<'en' | 'ar'>('en');
   const [isDark, setIsDark] = useState(true);
   
   useEffect(() => {
-    // Detect language from HTML lang attribute
-    const htmlLang = document.documentElement.lang;
-    if (htmlLang === 'ar') {
-      setLocale('ar');
+    // Use prop locale if provided, otherwise detect from HTML
+    if (propLocale === 'ar' || propLocale === 'en') {
+      setLocale(propLocale as 'en' | 'ar');
+    } else {
+      // Detect language from HTML lang attribute
+      const htmlLang = document.documentElement.lang;
+      if (htmlLang === 'ar') {
+        setLocale('ar');
+      }
     }
     
     // Check preferred color scheme
@@ -70,10 +79,14 @@ export default function Footer() {
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [propLocale]);
 
   const t = translations[locale];
   const currentYear = new Date().getFullYear();
+  const isRTL = locale === 'ar';
+  
+  // Get company data based on current locale
+  const companyData = companyInfo[locale];
 
   // Dynamic classes based on theme
   const bgClass = isDark ? "bg-gray-900" : "bg-gray-100";
@@ -87,14 +100,14 @@ export default function Footer() {
   const iconClass = "text-amber-500";
 
   return (
-    <footer className={`${bgClass} ${textClass} pt-16 pb-8 transition-colors duration-300`}>
+    <footer className={`${bgClass} ${textClass} pt-16 pb-8 transition-colors duration-300 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+        <div className={`grid grid-cols-1 md:grid-cols-4 gap-10 ${isRTL ? 'text-right' : 'text-left'}`}>
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-6">{companyInfo.name}</h3>
-            <p className={`${textMutedClass} mb-4`}>{companyInfo.shortDescription}</p>
-            <div className="flex space-x-4">
+            <h3 className="text-xl font-bold mb-6">{companyData.name}</h3>
+            <p className={`${textMutedClass} mb-4`}>{companyData.shortDescription}</p>
+            <div className={`flex ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
               <a href="#" aria-label="Instagram" className={`${textMutedClass} ${textHoverClass} transition-colors`}>
                 <Instagram size={20} />
               </a>
@@ -143,19 +156,19 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-6">{t.contactInfo}</h3>
             <ul className="space-y-3">
-              <li className="flex items-start">
-                <MapPin size={20} className={`${iconClass} mt-1 mr-2 flex-shrink-0`} />
+              <li className={`flex items-start ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <MapPin size={20} className={`${iconClass} mt-1 flex-shrink-0 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
                 <span className={textMutedClass}>
-                  Baghdad, Iraq
+                  {companyData.headquarters}
                 </span>
               </li>
-              <li className="flex items-center">
-                <Phone size={20} className={`${iconClass} mr-2 flex-shrink-0`} />
+              <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <Phone size={20} className={`${iconClass} flex-shrink-0 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
                 <span className={textMutedClass}>+964 123 456 7890</span>
               </li>
-              <li className="flex items-center">
-                <Mail size={20} className={`${iconClass} mr-2 flex-shrink-0`} />
-                <span className={textMutedClass}>info@mesopotamiagroup.com</span>
+              <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <Mail size={20} className={`${iconClass} flex-shrink-0 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
+                <span className={textMutedClass}>info@landoffranchise.com</span>
               </li>
             </ul>
           </div>
@@ -168,7 +181,10 @@ export default function Footer() {
                 <input
                   type="email"
                   placeholder={t.emailPlaceholder}
-                  className={`w-full px-4 py-2 ${inputBgClass} border ${inputBorderClass} rounded-md ${inputTextClass} focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors duration-300`}
+                  className={`w-full px-4 py-2 ${inputBgClass} border ${inputBorderClass} rounded-md ${inputTextClass} focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors duration-300 ${
+                    isRTL ? 'text-right' : 'text-left'
+                  }`}
+                  dir={isRTL ? 'rtl' : 'ltr'}
                   required
                 />
               </div>
@@ -182,11 +198,13 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className={`border-t ${dividerClass} mt-12 pt-8 flex flex-col md:flex-row justify-between items-center`}>
-          <div className={`${textMutedClass} text-sm mb-4 md:mb-0`}>
-            &copy; {currentYear} {companyInfo.name}. {t.copyright}.
+        <div className={`border-t ${dividerClass} mt-12 pt-8 flex flex-col md:flex-row justify-between items-center ${
+          isRTL ? 'md:flex-row-reverse' : ''
+        }`}>
+          <div className={`${textMutedClass} text-sm mb-4 md:mb-0 ${isRTL ? 'text-right' : 'text-left'}`}>
+            &copy; {currentYear} {companyData.name}. {t.copyright}.
           </div>
-          <div className="flex space-x-6">
+          <div className={`flex ${isRTL ? 'space-x-reverse space-x-6' : 'space-x-6'}`}>
             <Link href="/privacy" className={`${textMutedClass} ${textHoverClass} text-sm transition-colors`}>
               {t.privacy}
             </Link>

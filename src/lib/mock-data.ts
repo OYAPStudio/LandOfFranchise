@@ -28,7 +28,6 @@ export interface CompanyStats {
 }
 
 export interface CompanyInfo {
-  name: any;
   en: {
     name: string;
     tagline: string;
@@ -190,6 +189,5 @@ export const companyInfo: CompanyInfo = {
       "تركيز كامل على رضا العملاء",
       "الالتزام بخدمة المجتمع كجزء من رؤيتنا"
     ]
-  },
-  name: undefined
+  }
 };
