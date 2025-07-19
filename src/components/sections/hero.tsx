@@ -37,7 +37,7 @@ const slideshowContent = {
       id: 4,
       type: 'image',
       src: '/images/restaurants/AWS09279.jpg',
-      alt: 'Restaurant ambience video',
+      alt: 'Restaurant ambience',
       title: 'Immersive Atmosphere',
       subtitle: 'Feel the essence of authentic Middle Eastern hospitality',
     },
@@ -45,23 +45,25 @@ const slideshowContent = {
       id: 5,
       type: 'image',
       src: '/images/restaurants/DSC00026.jpg',
-      alt: 'Fine dining plated food',
-      title: 'Culinary Excellence',
-      subtitle: 'Where tradition meets innovation',
-    },{
+      alt: 'Premium coffee experience',
+      title: 'Coffee Excellence',
+      subtitle: 'Premium coffee in unique locations',
+    },
+    {
       id: 6,
       type: 'image',
       src: '/images/restaurants/AWS09281.jpg',
-      alt: 'Fine dining plated food',
-      title: 'Culinary Excellence',
-      subtitle: 'Where tradition meets innovation',
-    },{
+      alt: 'Modern dining space',
+      title: 'Modern Comfort',
+      subtitle: 'Contemporary designs with traditional warmth',
+    },
+    {
       id: 7,
       type: 'image',
       src: '/images/restaurants/AWS09315.jpg',
-      alt: 'Fine dining plated food',
-      title: 'Culinary Excellence',
-      subtitle: 'Where tradition meets innovation',
+      alt: 'Shawarma specialty',
+      title: 'Authentic Shawarma',
+      subtitle: 'The taste that started our journey',
     },
   ],
   ar: [
@@ -91,12 +93,36 @@ const slideshowContent = {
     },
     {
       id: 4,
-      type: 'video',
-      src: '/videos/restaurant-ambience.mp4',
-      alt: 'فيديو أجواء المطعم',
+      type: 'image',
+      src: '/images/restaurants/AWS09279.jpg',
+      alt: 'أجواء المطعم',
       title: 'أجواء غامرة',
       subtitle: 'استشعر جوهر الضيافة الشرق أوسطية الأصيلة',
-    }
+    },
+    {
+      id: 5,
+      type: 'image',
+      src: '/images/restaurants/DSC00026.jpg',
+      alt: 'تجربة قهوة مميزة',
+      title: 'تميز في القهوة',
+      subtitle: 'قهوة مميزة في مواقع فريدة',
+    },
+    {
+      id: 6,
+      type: 'image',
+      src: '/images/restaurants/AWS09281.jpg',
+      alt: 'مساحة طعام عصرية',
+      title: 'الراحة العصرية',
+      subtitle: 'تصاميم معاصرة بدفء تقليدي',
+    },
+    {
+      id: 7,
+      type: 'image',
+      src: '/images/restaurants/AWS09315.jpg',
+      alt: 'شاورما مميزة',
+      title: 'الشاورما الأصيلة',
+      subtitle: 'الطعم الذي بدأت منه رحلتنا',
+    },
   ]
 };
 
@@ -128,39 +154,40 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [prevSlide, setPrevSlide] = useState(0);
   const [isManualChange, setIsManualChange] = useState(false);
-  const [slideDirection, setSlideDirection] = useState(0); // 1 for right, -1 for left, 0 for initial
+  const [slideDirection, setSlideDirection] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const slideInterval = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isAutoplayEnabled = useRef(true);
-  // Use locale prop directly instead of accessing document
-  const currentLocale = (locale in slideshowContent) ? locale as keyof typeof slideshowContent : 'en';
-  const slides = slideshowContent[currentLocale] || slideshowContent.en;
-  const t = translations[currentLocale] || translations.en;
+  
+  // Use locale prop and ensure it's a valid key
+  const currentLocale = (locale === 'ar' ? 'ar' : 'en') as keyof typeof slideshowContent;
+  const isRTL = currentLocale === 'ar';
+  const slides = slideshowContent[currentLocale];
+  const t = translations[currentLocale];
   const currentContent = slides[currentSlide] || slides[0];
+  
+  // Get company info based on current locale
+  const companyData = companyInfo[currentLocale];
 
-  // Move goToNextSlide above startSlideTimer
   const goToNextSlide = useCallback((manual = true) => {
     if (isAnimating) return;
     setIsAnimating(true);
-    setSlideDirection(1); // Right direction
+    setSlideDirection(1);
     setPrevSlide(currentSlide);
     setCurrentSlide((prev) => (prev + 1) % slides.length);
     setIsManualChange(manual);
   }, [isAnimating, currentSlide, slides.length]);
 
   const startSlideTimer = useCallback(() => {
-    // Clear existing interval if any
     if (slideInterval.current) {
       clearInterval(slideInterval.current);
     }
-    // If the slide was changed manually, reset after a longer delay to allow viewing
     const delay = isManualChange ? 8000 : 5000;
-    // Set new interval
     slideInterval.current = setInterval(() => {
       if (!isAnimating && isAutoplayEnabled.current) {
-        goToNextSlide(false); // false means it's not a manual change
+        goToNextSlide(false);
       }
     }, delay);
   }, [isManualChange, isAnimating, goToNextSlide]);
@@ -171,11 +198,8 @@ export default function Hero({ locale = 'en' }: HeroProps) {
 
   useEffect(() => {
     if (currentSlide !== prevSlide) {
-      // Determine the direction based on slide change
       if (slideDirection === 0) {
-        // For the initial load or after a direct selection
         const newDirection = currentSlide > prevSlide ? 1 : -1;
-        // Handle wrap-around case
         if (currentSlide === 0 && prevSlide === slides.length - 1) {
           setSlideDirection(1);
         } else if (currentSlide === slides.length - 1 && prevSlide === 0) {
@@ -186,7 +210,6 @@ export default function Hero({ locale = 'en' }: HeroProps) {
       }
       setPrevSlide(currentSlide);
     }
-    // Set up automatic slide transition
     if (isMounted) {
       startSlideTimer();
     }
@@ -197,12 +220,10 @@ export default function Hero({ locale = 'en' }: HeroProps) {
     };
   }, [currentSlide, prevSlide, slideDirection, currentLocale, isMounted, slides.length, startSlideTimer]);
 
-  // Ensure autoplay continues
   useEffect(() => {
     if (!isMounted) return;
-    // Start autoplay when component mounts
     startSlideTimer();
-    // Add event listeners to pause autoplay when user interacts with the page
+    
     const handleVisibilityChange = () => {
       if (document.hidden) {
         if (slideInterval.current) {
@@ -212,19 +233,23 @@ export default function Hero({ locale = 'en' }: HeroProps) {
         startSlideTimer();
       }
     };
+    
     const handleFocus = () => {
       isAutoplayEnabled.current = true;
       startSlideTimer();
     };
+    
     const handleBlur = () => {
       isAutoplayEnabled.current = false;
       if (slideInterval.current) {
         clearInterval(slideInterval.current);
       }
     };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleFocus);
     window.addEventListener('blur', handleBlur);
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleFocus);
@@ -235,25 +260,19 @@ export default function Hero({ locale = 'en' }: HeroProps) {
     };
   }, [isMounted, startSlideTimer]);
 
-  // Fix for video playback
   useEffect(() => {
     if (!isMounted) return;
-    // If the current slide is a video, ensure it plays
     if (slides[currentSlide]?.type === 'video' && videoRef.current) {
       const playVideo = async () => {
         try {
-          // Try to load and play the video
           await videoRef.current?.load();
           const playPromise = videoRef.current?.play();
-          // Handle the play promise to avoid DOMException
           if (playPromise !== undefined) {
             playPromise
               .then(() => {
-                // Video playback started successfully
                 console.log('Video playback started');
               })
               .catch(error => {
-                // Auto-play was prevented or there was an error
                 console.error('Video playback failed:', error);
               });
           }
@@ -268,12 +287,9 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   const goToSlide = (index: number) => {
     if (isAnimating || index === currentSlide) return;
     
-    // Store previous slide to determine direction
     setPrevSlide(currentSlide);
     
-    // Determine slide direction (left or right)
     const newDirection = index > currentSlide ? 1 : -1;
-    // Handle wrap-around case
     if (index === 0 && currentSlide === slides.length - 1) {
       setSlideDirection(1);
     } else if (index === slides.length - 1 && currentSlide === 0) {
@@ -291,7 +307,7 @@ export default function Hero({ locale = 'en' }: HeroProps) {
     if (isAnimating) return;
     
     setIsAnimating(true);
-    setSlideDirection(-1); // Left direction
+    setSlideDirection(-1);
     setPrevSlide(currentSlide);
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
     setIsManualChange(true);
@@ -302,11 +318,11 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   };
 
   if (!isMounted) {
-    return null; // Prevent server-side rendering mismatch
+    return null;
   }
 
   return (
-    <section id="home" className="relative w-full h-screen overflow-hidden">
+    <section id="home" className={`relative w-full h-screen overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Slideshow background */}
       <AnimatePresence initial={false} custom={slideDirection} mode="sync">
         <motion.div
@@ -407,25 +423,31 @@ export default function Hero({ locale = 'en' }: HeroProps) {
       
       {/* Arrow navigation */}
       <button 
-        className="absolute left-6 top-1/2 z-30 p-3 bg-black/20 hover:bg-black/40 rounded-full text-white/90 hover:text-white transition-all duration-300 transform -translate-y-1/2 backdrop-blur-sm"
+        className={`absolute top-1/2 z-30 p-3 bg-black/20 hover:bg-black/40 rounded-full text-white/90 hover:text-white transition-all duration-300 transform -translate-y-1/2 backdrop-blur-sm ${
+          isRTL ? 'right-6' : 'left-6'
+        }`}
         onClick={goToPrevSlide}
         disabled={isAnimating}
         aria-label={t.prevSlide}
       >
-        <ChevronLeft size={24} />
+        <ChevronLeft size={24} className={isRTL ? 'rotate-180' : ''} />
       </button>
       
       <button 
-        className="absolute right-6 top-1/2 z-30 p-3 bg-black/20 hover:bg-black/40 rounded-full text-white/90 hover:text-white transition-all duration-300 transform -translate-y-1/2 backdrop-blur-sm"
+        className={`absolute top-1/2 z-30 p-3 bg-black/20 hover:bg-black/40 rounded-full text-white/90 hover:text-white transition-all duration-300 transform -translate-y-1/2 backdrop-blur-sm ${
+          isRTL ? 'left-6' : 'right-6'
+        }`}
         onClick={() => goToNextSlide(true)}
         disabled={isAnimating}
         aria-label={t.nextSlide}
       >
-        <ChevronRight size={24} />
+        <ChevronRight size={24} className={isRTL ? 'rotate-180' : ''} />
       </button>
 
       {/* Hero content */}
-      <div className="container relative z-20 mx-auto h-full flex items-center px-4 md:px-6">
+      <div className={`container relative z-20 mx-auto h-full flex items-center px-4 md:px-6 ${
+        isRTL ? 'justify-end' : 'justify-start'
+      }`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={`content-${currentSlide}`}
@@ -437,7 +459,7 @@ export default function Hero({ locale = 'en' }: HeroProps) {
               staggerChildren: 0.1,
               delayChildren: 0.2,
             }}
-            className="max-w-3xl"
+            className={`max-w-3xl ${isRTL ? 'text-right' : 'text-left'}`}
           >
             <motion.h2 
               initial={{ y: 20, opacity: 0 }}
@@ -454,19 +476,19 @@ export default function Hero({ locale = 'en' }: HeroProps) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-              className="flex items-center mb-4"
+              className={`flex items-center mb-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}
             >
-              <div className="relative w-20 h-20 mr-4">
+              <div className={`relative w-20 h-20 ${isRTL ? 'ml-4 mr-0' : 'mr-4 ml-0'}`}>
                 <Image 
                   src="/images/logo/LF-2.png" 
-                  alt={`${companyInfo.name} Logo`}
+                  alt={`${companyData.name} Logo`}
                   width={180}
                   height={180}
                   className="object-contain"
                 />
               </div>
               <h1 className="text-4xl md:text-6xl font-bold text-white">
-                {companyInfo.name}
+                {companyData.name}
               </h1>
             </motion.div>
             
@@ -485,11 +507,13 @@ export default function Hero({ locale = 'en' }: HeroProps) {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-              className="flex items-center space-x-4 mb-8"
+              className={`flex items-center mb-8 ${
+                isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'
+              }`}
             >
               <div className="w-16 h-1 bg-amber-500"></div>
               <p className="text-amber-300 font-medium">
-                17 {t.years}
+                {new Date().getFullYear() - companyData.foundedYear} {t.years}
               </p>
             </motion.div>
             
@@ -509,4 +533,4 @@ export default function Hero({ locale = 'en' }: HeroProps) {
       </div>
     </section>
   );
-}
+} 

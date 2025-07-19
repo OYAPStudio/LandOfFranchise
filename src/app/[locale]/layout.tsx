@@ -58,11 +58,11 @@ export default async function RootLayout({
     <html 
       lang={locale} 
       dir={locale === 'ar' ? 'rtl' : 'ltr'}
-      className={`${inter.variable} ${cairo.variable}`}
+      className={`${inter.variable} ${cairo.variable} overflow-x-hidden`}
       suppressHydrationWarning
     >
       <head />
-      <body suppressHydrationWarning>
+      <body className="overflow-x-hidden" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -93,6 +93,164 @@
   html {
     scroll-behavior: smooth;
   }
+
+  /* Custom Scrollbar Styles for Land of Franchise Website */
+
+  /* Webkit Browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 12px; /* Vertical scrollbar width only */
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.1); /* Light gray track */
+    border-radius: 6px;
+  }
+
+  ::-webkit-scrollbar-track:hover {
+    background: rgba(30, 41, 59, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #f59e0b, #d97706); /* Amber gradient to match your brand */
+    border-radius: 6px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #d97706, #b45309); /* Darker amber on hover */
+    transform: scale(1.05);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background: linear-gradient(135deg, #b45309, #92400e); /* Even darker when active */
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: rgba(30, 41, 59, 0.1);
+  }
+
+  /* Dark mode scrollbar styles */
+  .dark ::-webkit-scrollbar-track {
+    background: rgba(148, 163, 184, 0.1); /* Darker track for dark mode */
+  }
+
+  .dark ::-webkit-scrollbar-track:hover {
+    background: rgba(148, 163, 184, 0.2);
+  }
+
+  .dark ::-webkit-scrollbar-corner {
+    background: rgba(148, 163, 184, 0.1);
+  }
+
+  /* Firefox Scrollbar Styles */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: #f59e0b rgba(30, 41, 59, 0.1);
+  }
+
+  .dark html {
+    scrollbar-color: #f59e0b rgba(148, 163, 184, 0.1);
+  }
+
+  /* Custom RTL scrollbar styles for Arabic layout */
+  .rtl ::-webkit-scrollbar {
+    direction: rtl;
+  }
+
+  /* Mobile touch scrolling enhancement */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Focus states for accessibility */
+  ::-webkit-scrollbar-thumb:focus {
+    outline: 2px solid #f59e0b;
+    outline-offset: 2px;
+  }
+
+  /* Animation for scrollbar appearance */
+  @keyframes scrollbar-appear {
+    from {
+      opacity: 0;
+      transform: scaleY(0.5);
+    }
+    to {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+
+  ::-webkit-scrollbar-thumb {
+    animation: scrollbar-appear 0.3s ease-out;
+  }
+}
+
+@layer components {
+  /* Hide scrollbar but keep functionality (utility class) */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  /* Thin scrollbar variant */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(30, 41, 59, 0.05);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #f59e0b;
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #d97706;
+  }
+
+  /* Custom scrollbar for timeline components */
+  .timeline-container::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .timeline-container::-webkit-scrollbar-track {
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 5px;
+  }
+
+  .timeline-container::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Restaurant gallery scrollbar */
+  .restaurant-gallery::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .restaurant-gallery::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .restaurant-gallery::-webkit-scrollbar-thumb {
+    background: rgba(245, 158, 11, 0.8);
+    border-radius: 3px;
+  }
+
+  .restaurant-gallery::-webkit-scrollbar-thumb:hover {
+    background: rgba(245, 158, 11, 1);
+  }
 }
 
 /* Leaflet map styling for dark mode compatibility */

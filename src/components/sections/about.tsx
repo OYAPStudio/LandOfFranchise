@@ -58,9 +58,12 @@ export default function About({ locale = 'en' }: AboutProps) {
     setIsMounted(true);
   }, []);
 
-  // Use locale prop directly instead of accessing document
-  const currentLocale = (locale as keyof typeof translations) || 'en';
+  // Use locale prop and ensure it's a valid key
+  const currentLocale = (locale === 'ar' ? 'ar' : 'en') as keyof typeof translations;
   const t = translations[currentLocale];
+  
+  // Get company info based on current locale
+  const companyData = companyInfo[currentLocale];
 
   // Animation variants
   const fadeInUp = {
@@ -80,8 +83,13 @@ export default function About({ locale = 'en' }: AboutProps) {
   }
 
   return (
-    <section id="about" className="w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white overflow-hidden">
-      <div className="flex flex-col md:flex-row">
+    <section 
+      id="about" 
+      className={`w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white overflow-hidden ${
+        currentLocale === 'ar' ? 'rtl' : 'ltr'
+      }`}
+    >
+      <div className={`flex flex-col ${currentLocale === 'ar' ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
         {/* Left column - Image with parallax effect */}
         <div className="w-full md:w-1/2 relative aspect-[4/3] min-h-[300px] md:min-h-0 overflow-hidden flex items-center justify-center">
           <motion.div
@@ -97,7 +105,7 @@ export default function About({ locale = 'en' }: AboutProps) {
               fill
               className="object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/70 to-transparent dark:from-gray-900/70"></div>
+            <div className={`absolute inset-0 bg-gradient-to-${currentLocale === 'ar' ? 'l' : 'r'} from-white/70 to-transparent dark:from-gray-900/70`}></div>
           </motion.div>
           
           {/* Text overlay on the image */}
@@ -110,18 +118,26 @@ export default function About({ locale = 'en' }: AboutProps) {
               viewport={{ once: true }}
             >
               <div className="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-3 sm:p-6 rounded-lg">
-                <div className="flex items-center mb-2">
+                <div className={`flex items-center mb-2 ${currentLocale === 'ar' ? 'flex-row-reverse' : ''}`}>
                   <AnimatedIcon icon={Building} />
-                  <h3 className="text-sm sm:text-lg font-bold uppercase tracking-wider">{t.headquarters}</h3>
+                  <h3 className={`text-sm sm:text-lg font-bold uppercase tracking-wider ${currentLocale === 'ar' ? 'mr-3 ml-0' : ''}`}>
+                    {t.headquarters}
+                  </h3>
                 </div>
-                <p className="text-base sm:text-2xl font-light break-words">Mosul, Iraq</p>
+                <p className="text-base sm:text-2xl font-light break-words">
+                  {companyData.headquarters}
+                </p>
               </div>
               <div className="backdrop-blur-sm bg-white/30 dark:bg-gray-800/30 p-3 sm:p-6 rounded-lg">
-                <div className="flex items-center mb-2">
+                <div className={`flex items-center mb-2 ${currentLocale === 'ar' ? 'flex-row-reverse' : ''}`}>
                   <AnimatedIcon icon={Calendar} delay={0.1} />
-                  <h3 className="text-sm sm:text-lg font-bold uppercase tracking-wider">{t.founded}</h3>
+                  <h3 className={`text-sm sm:text-lg font-bold uppercase tracking-wider ${currentLocale === 'ar' ? 'mr-3 ml-0' : ''}`}>
+                    {t.founded}
+                  </h3>
                 </div>
-                <p className="text-base sm:text-2xl font-light break-words">2018</p>
+                <p className="text-base sm:text-2xl font-light break-words">
+                  {companyData.foundedYear}
+                </p>
               </div>
             </motion.div>
           </div>
@@ -130,7 +146,9 @@ export default function About({ locale = 'en' }: AboutProps) {
         {/* Right column - Content */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 md:p-16 bg-white dark:bg-gray-900">
           <motion.h2 
-            className="text-2xl sm:text-3xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white"
+            className={`text-2xl sm:text-3xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white ${
+              currentLocale === 'ar' ? 'text-right' : 'text-left'
+            }`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -151,11 +169,15 @@ export default function About({ locale = 'en' }: AboutProps) {
               custom={0.1}
               className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm"
             >
-              <div className="flex items-center mb-3">
+              <div className={`flex items-center mb-3 ${currentLocale === 'ar' ? 'flex-row-reverse' : ''}`}>
                 <AnimatedIcon icon={Award} />
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.story}</h3>
+                <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${currentLocale === 'ar' ? 'mr-3 ml-0' : ''}`}>
+                  {t.story}
+                </h3>
               </div>
-              <p className="text-gray-700 dark:text-gray-300">{companyInfo.longDescription}</p>
+              <p className={`text-gray-700 dark:text-gray-300 ${currentLocale === 'ar' ? 'text-right' : 'text-left'}`}>
+                {companyData.longDescription}
+              </p>
             </motion.div>
             
             <motion.div 
@@ -163,11 +185,15 @@ export default function About({ locale = 'en' }: AboutProps) {
               custom={0.2}
               className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm"
             >
-              <div className="flex items-center mb-3">
+              <div className={`flex items-center mb-3 ${currentLocale === 'ar' ? 'flex-row-reverse' : ''}`}>
                 <AnimatedIcon icon={Target} delay={0.1} />
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.mission}</h3>
+                <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${currentLocale === 'ar' ? 'mr-3 ml-0' : ''}`}>
+                  {t.mission}
+                </h3>
               </div>
-              <p className="text-gray-700 dark:text-gray-300">{companyInfo.mission}</p>
+              <p className={`text-gray-700 dark:text-gray-300 ${currentLocale === 'ar' ? 'text-right' : 'text-left'}`}>
+                {companyData.mission}
+              </p>
             </motion.div>
             
             <motion.div 
@@ -175,11 +201,15 @@ export default function About({ locale = 'en' }: AboutProps) {
               custom={0.3}
               className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm"
             >
-              <div className="flex items-center mb-3">
+              <div className={`flex items-center mb-3 ${currentLocale === 'ar' ? 'flex-row-reverse' : ''}`}>
                 <AnimatedIcon icon={Compass} delay={0.2} />
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.vision}</h3>
+                <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${currentLocale === 'ar' ? 'mr-3 ml-0' : ''}`}>
+                  {t.vision}
+                </h3>
               </div>
-              <p className="text-gray-700 dark:text-gray-300">{companyInfo.vision}</p>
+              <p className={`text-gray-700 dark:text-gray-300 ${currentLocale === 'ar' ? 'text-right' : 'text-left'}`}>
+                {companyData.vision}
+              </p>
             </motion.div>
             
             <motion.div 
@@ -187,22 +217,30 @@ export default function About({ locale = 'en' }: AboutProps) {
               custom={0.4}
               className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm"
             >
-              <div className="flex items-center mb-3">
+              <div className={`flex items-center mb-3 ${currentLocale === 'ar' ? 'flex-row-reverse' : ''}`}>
                 <AnimatedIcon icon={Heart} delay={0.3} />
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t.values}</h3>
+                <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${currentLocale === 'ar' ? 'mr-3 ml-0' : ''}`}>
+                  {t.values}
+                </h3>
               </div>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {companyInfo.values.map((value, index) => (
+                {companyData.values.map((value, index) => (
                   <motion.li 
                     key={index}
-                    initial={{ opacity: 0, x: -10 }}
+                    initial={{ opacity: 0, x: currentLocale === 'ar' ? 10 : -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.4 + (index * 0.1) }}
                     viewport={{ once: true }}
                     className="flex items-center bg-white dark:bg-gray-700 p-3 rounded-md shadow-sm"
                   >
-                    <span className="mr-2 flex-shrink-0 w-2 h-2 bg-amber-500 rounded-full"></span>
-                    <span className="text-gray-700 dark:text-gray-300">{value}</span>
+                    <span className={`flex-shrink-0 w-2 h-2 bg-amber-500 rounded-full ${
+                      currentLocale === 'ar' ? 'ml-2 mr-0' : 'mr-2 ml-0'
+                    }`}></span>
+                    <span className={`text-gray-700 dark:text-gray-300 ${
+                      currentLocale === 'ar' ? 'text-right' : 'text-left'
+                    }`}>
+                      {value}
+                    </span>
                   </motion.li>
                 ))}
               </ul>

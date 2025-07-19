@@ -25,7 +25,10 @@ const translations = {
     reserveTable: "Reserve a Table",
     menuHighlights: "Menu Highlights",
     specialties: "Specialties",
-    rating: "Customer Rating"
+    rating: "Customer Rating",
+    moreDetails: "More Details",
+    lessDetails: "Less Details",
+    comingSoon: "Coming soon"
   },
   ar: {
     title: "مطاعمنا",
@@ -43,7 +46,10 @@ const translations = {
     reserveTable: "احجز طاولة",
     menuHighlights: "أبرز القائمة",
     specialties: "التخصصات",
-    rating: "تقييم العملاء"
+    rating: "تقييم العملاء",
+    moreDetails: "المزيد من التفاصيل",
+    lessDetails: "أقل تفاصيل",
+    comingSoon: "قريباً"
   }
 };
 
@@ -77,13 +83,16 @@ interface ButtonProps {
   text: string;
   primary?: boolean;
   onClick?: () => void;
+  isRTL?: boolean;
 }
 
-function Button({ icon: Icon, text, primary = false, onClick }: ButtonProps) {
+function Button({ icon: Icon, text, primary = false, onClick, isRTL = false }: ButtonProps) {
   return (
     <motion.button
       onClick={onClick}
       className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm font-medium transition-colors ${
+        isRTL ? 'flex-row-reverse' : ''
+      } ${
         primary
           ? "bg-amber-500 hover:bg-amber-600 text-white shadow-md"
           : "bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-600"
@@ -134,9 +143,10 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [expandedDetails, setExpandedDetails] = useState<number | null>(null);
   
-  // Use locale prop directly instead of accessing document
-  const currentLocale = (locale as keyof typeof translations) || 'en';
+  // Use locale prop and ensure it's a valid key
+  const currentLocale = (locale === 'ar' ? 'ar' : 'en') as keyof typeof translations;
   const t = translations[currentLocale];
+  const isRTL = currentLocale === 'ar';
 
   // Toggle expanded details
   const toggleExpand = (index: number) => {
@@ -211,9 +221,12 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
   };
 
   return (
-    <section id="restaurants" className="py-24 w-full bg-white dark:bg-gray-800">
+    <section 
+      id="restaurants" 
+      className={`py-24 w-full bg-white dark:bg-gray-800 ${isRTL ? 'rtl' : 'ltr'}`}
+    >
       <div className="container mx-auto px-4">
-        <div className="text-center mb-20">
+        <div className={`text-center mb-20 ${isRTL ? 'rtl' : 'ltr'}`}>
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -252,312 +265,327 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
         >
-          {restaurants.map((restaurant, index) => (
-            <motion.div
-              key={restaurant.id}
-              className="relative"
-              variants={restaurantCardVariants}
-              whileHover="hover"
-              onMouseEnter={() => setActiveIndex(index)}
-              onMouseLeave={() => setActiveIndex(null)}
-            >
-              {/* Logo that overlaps the top of the card */}
-              <motion.div 
-                className="absolute -top-16 left-10 z-10"
-                variants={logoVariants}
+          {restaurants.map((restaurant, index) => {
+            // Get restaurant data based on current locale
+            const restaurantData = restaurant[currentLocale];
+            
+            return (
+              <motion.div
+                key={restaurant.id}
+                className="relative"
+                variants={restaurantCardVariants}
                 whileHover="hover"
+                onMouseEnter={() => setActiveIndex(index)}
+                onMouseLeave={() => setActiveIndex(null)}
               >
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 dark:from-amber-500 dark:to-amber-700 shadow-lg shadow-amber-200 dark:shadow-amber-900/20 flex items-center justify-center p-1 border-2 border-white dark:border-gray-800">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-800 flex items-center justify-center">
-                    {restaurant.logo ? (
-                      // Display the logo if available
-                      <Image 
-                        src={restaurant.logo} 
-                        alt={`${restaurant.name} logo`}
-                        width={150}
-                        height={150}
-                        className="object-contain"
-                      />
-                    ) : (
-                      // Fallback to initials if no logo is available
-                      <div className="w-full h-full rounded-full bg-amber-500 flex items-center justify-center">
-                        <span className="text-3xl font-bold text-white">
-                          {restaurant.name.substring(0, 2).toUpperCase()}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-              
-              <motion.div 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700"
-                style={{ 
-                  boxShadow: activeIndex === index 
-                    ? "0 20px 40px -15px rgba(0, 0, 0, 0.15), 0 0 15px -5px rgba(245, 158, 11, 0.1)" 
-                    : "0 10px 30px -15px rgba(0, 0, 0, 0.1)" 
-                }}
-                transition={{ 
-                  boxShadow: { duration: 0.5 }
-                }}
-              >
-                <div className="flex flex-col md:flex-row">
-                  {/* Info section */}
-                  <div className="w-full md:w-1/2 p-10 pt-16 relative">
-                    {/* Rating badge removed as requested */}
-                    
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <Badge text={restaurant.cuisineType} />
-                      {restaurant.specialties && <Badge text={restaurant.specialties} />}
-                    </div>
-                    
-                    <h3 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white flex items-center">
-                      {restaurant.name}
-                    </h3>
-                    
-                    <p className="text-gray-600 dark:text-gray-300 mb-6 border-l-4 border-amber-500 pl-3 italic">
-                      {restaurant.description}
-                    </p>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                      <div className="flex items-center space-x-2">
-                        <motion.div 
-                          className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
-                          initial={{ scale: 0, rotate: -10 }}
-                          whileInView={{ scale: 1, rotate: 0 }}
-                          transition={{ 
-                            type: "spring" as const, 
-                            stiffness: 260, 
-                            damping: 20, 
-                            delay: 0.1 
-                          }}
-                          viewport={{ once: true }}
-                          whileHover={{ 
-                            scale: 1.1,
-                            backgroundColor: "#FEF3C7",
-                            transition: { duration: 0.2 }
-                          }}
-                        >
-                          <Calendar className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
-                        </motion.div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          <span className="font-semibold">{t.since}:</span> <AnimatedCounter value={restaurant.foundedYear} useComma={false} />
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <motion.div 
-                          className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
-                          initial={{ scale: 0, rotate: -10 }}
-                          whileInView={{ scale: 1, rotate: 0 }}
-                          transition={{ 
-                            type: "spring" as const, 
-                            stiffness: 260, 
-                            damping: 20, 
-                            delay: 0.2 
-                          }}
-                          viewport={{ once: true }}
-                          whileHover={{ 
-                            scale: 1.1,
-                            backgroundColor: "#FEF3C7",
-                            transition: { duration: 0.2 }
-                          }}
-                        >
-                          <Users className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
-                        </motion.div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          <span className="font-semibold">{t.employees}:</span> <AnimatedCounter value={restaurant.employeeCount} />
-                        </span>
-                      </div>
-
-                      <div className="flex items-center space-x-2">
-                        <motion.div 
-                          className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
-                          initial={{ scale: 0, rotate: -10 }}
-                          whileInView={{ scale: 1, rotate: 0 }}
-                          transition={{ 
-                            type: "spring" as const, 
-                            stiffness: 260, 
-                            damping: 20, 
-                            delay: 0.3 
-                          }}
-                          viewport={{ once: true }}
-                          whileHover={{ 
-                            scale: 1.1,
-                            backgroundColor: "#FEF3C7",
-                            transition: { duration: 0.2 }
-                          }}
-                        >
-                          <Clock className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
-                        </motion.div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          <span className="font-semibold">{t.hours}:</span> {restaurant.openingHours}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <motion.div 
-                          className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
-                          initial={{ scale: 0, rotate: -10 }}
-                          whileInView={{ scale: 1, rotate: 0 }}
-                          transition={{ 
-                            type: "spring" as const, 
-                            stiffness: 260, 
-                            damping: 20, 
-                            delay: 0.4 
-                          }}
-                          viewport={{ once: true }}
-                          whileHover={{ 
-                            scale: 1.1,
-                            backgroundColor: "#FEF3C7",
-                            transition: { duration: 0.2 }
-                          }}
-                        >
-                          <Building2 className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
-                        </motion.div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          <span className="font-semibold">{t.cuisine}:</span> {restaurant.cuisineType}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Specialties */}
-                    {expandedDetails === index && (
-                      <motion.div 
-                        className="mb-6"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <h4 className="font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
-                          <Utensils className="w-4 h-4 mr-2 text-amber-500" />
-                          {t.specialties}
-                        </h4>
-                        <div className="text-gray-700 dark:text-gray-300 text-sm">
-                          {restaurant.specialties || <span className="text-gray-600 dark:text-gray-400 italic">Coming soon</span>}
+                {/* Logo that overlaps the top of the card */}
+                <motion.div 
+                  className={`absolute -top-16 z-10 ${isRTL ? 'right-10' : 'left-10'}`}
+                  variants={logoVariants}
+                  whileHover="hover"
+                >
+                  <div className="w-32 h-32 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 dark:from-amber-500 dark:to-amber-700 shadow-lg shadow-amber-200 dark:shadow-amber-900/20 flex items-center justify-center p-1 border-2 border-white dark:border-gray-800">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-800 flex items-center justify-center">
+                      {restaurantData.logo ? (
+                        // Display the logo if available
+                        <Image 
+                          src={restaurantData.logo} 
+                          alt={`${restaurantData.name} logo`}
+                          width={150}
+                          height={150}
+                          className="object-contain"
+                        />
+                      ) : (
+                        // Fallback to initials if no logo is available
+                        <div className="w-full h-full rounded-full bg-amber-500 flex items-center justify-center">
+                          <span className="text-3xl font-bold text-white">
+                            {restaurantData.name.substring(0, 2).toUpperCase()}
+                          </span>
                         </div>
-                      </motion.div>
-                    )}
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700"
+                  style={{ 
+                    boxShadow: activeIndex === index 
+                      ? "0 20px 40px -15px rgba(0, 0, 0, 0.15), 0 0 15px -5px rgba(245, 158, 11, 0.1)" 
+                      : "0 10px 30px -15px rgba(0, 0, 0, 0.1)" 
+                  }}
+                  transition={{ 
+                    boxShadow: { duration: 0.5 }
+                  }}
+                >
+                  <div className={`flex flex-col ${isRTL ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
+                    {/* Info section */}
+                    <div className="w-full md:w-1/2 p-10 pt-16 relative">
+                      <div className={`flex flex-wrap gap-2 mb-3 ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                        <Badge text={restaurantData.cuisineType} />
+                        {restaurantData.specialties && <Badge text={restaurantData.specialties} />}
+                      </div>
+                      
+                      <h3 className={`text-3xl font-bold mb-2 text-gray-900 dark:text-white flex items-center ${
+                        isRTL ? 'text-right justify-end' : 'text-left justify-start'
+                      }`}>
+                        {restaurantData.name}
+                      </h3>
+                      
+                      <p className={`text-gray-600 dark:text-gray-300 mb-6 pl-3 italic ${
+                        isRTL 
+                          ? 'border-r-4 border-amber-500 pr-3 pl-0 text-right' 
+                          : 'border-l-4 border-amber-500 text-left'
+                      }`}>
+                        {restaurantData.description}
+                      </p>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                          <motion.div 
+                            className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
+                            initial={{ scale: 0, rotate: -10 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            transition={{ 
+                              type: "spring" as const, 
+                              stiffness: 260, 
+                              damping: 20, 
+                              delay: 0.1 
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{ 
+                              scale: 1.1,
+                              backgroundColor: "#FEF3C7",
+                              transition: { duration: 0.2 }
+                            }}
+                          >
+                            <Calendar className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                          </motion.div>
+                          <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                            <span className="font-semibold">{t.since}:</span> <AnimatedCounter value={restaurantData.foundedYear} useComma={false} />
+                          </span>
+                        </div>
+                        
+                        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                          <motion.div 
+                            className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
+                            initial={{ scale: 0, rotate: -10 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            transition={{ 
+                              type: "spring" as const, 
+                              stiffness: 260, 
+                              damping: 20, 
+                              delay: 0.2 
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{ 
+                              scale: 1.1,
+                              backgroundColor: "#FEF3C7",
+                              transition: { duration: 0.2 }
+                            }}
+                          >
+                            <Users className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                          </motion.div>
+                          <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                            <span className="font-semibold">{t.employees}:</span> <AnimatedCounter value={restaurantData.employeeCount} />
+                          </span>
+                        </div>
 
-                    {/* Address section */}
-                    <div className="mb-6 flex items-start space-x-2">
+                        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                          <motion.div 
+                            className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
+                            initial={{ scale: 0, rotate: -10 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            transition={{ 
+                              type: "spring" as const, 
+                              stiffness: 260, 
+                              damping: 20, 
+                              delay: 0.3 
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{ 
+                              scale: 1.1,
+                              backgroundColor: "#FEF3C7",
+                              transition: { duration: 0.2 }
+                            }}
+                          >
+                            <Clock className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                          </motion.div>
+                          <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                            <span className="font-semibold">{t.hours}:</span> {restaurantData.openingHours}
+                          </span>
+                        </div>
+                        
+                        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                          <motion.div 
+                            className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
+                            initial={{ scale: 0, rotate: -10 }}
+                            whileInView={{ scale: 1, rotate: 0 }}
+                            transition={{ 
+                              type: "spring" as const, 
+                              stiffness: 260, 
+                              damping: 20, 
+                              delay: 0.4 
+                            }}
+                            viewport={{ once: true }}
+                            whileHover={{ 
+                              scale: 1.1,
+                              backgroundColor: "#FEF3C7",
+                              transition: { duration: 0.2 }
+                            }}
+                          >
+                            <Building2 className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                          </motion.div>
+                          <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                            <span className="font-semibold">{t.cuisine}:</span> {restaurantData.cuisineType}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Specialties */}
+                      {expandedDetails === index && (
+                        <motion.div 
+                          className="mb-6"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <h4 className={`font-semibold text-gray-900 dark:text-white mb-2 flex items-center ${
+                            isRTL ? 'flex-row-reverse text-right' : 'text-left'
+                          }`}>
+                            <Utensils className={`w-4 h-4 text-amber-500 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
+                            {t.specialties}
+                          </h4>
+                          <div className={`text-gray-700 dark:text-gray-300 text-sm ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {restaurantData.specialties || <span className="text-gray-600 dark:text-gray-400 italic">{t.comingSoon}</span>}
+                          </div>
+                        </motion.div>
+                      )}
+
+                      {/* Address section */}
+                      <div className={`mb-6 flex items-start space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse text-right' : 'text-left'}`}>
+                        <motion.div 
+                          className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 mt-1"
+                          initial={{ scale: 0, rotate: -10 }}
+                          whileInView={{ scale: 1, rotate: 0 }}
+                          transition={{ 
+                            type: "spring" as const, 
+                            stiffness: 260, 
+                            damping: 20, 
+                            delay: 0.5 
+                          }}
+                          viewport={{ once: true }}
+                          whileHover={{ 
+                            scale: 1.2,
+                            rotate: [0, -5, 5, -5, 0],
+                            transition: { 
+                              scale: { duration: 0.2 },
+                              rotate: { duration: 0.5, ease: "easeInOut" }
+                            }
+                          }}
+                        >
+                          <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                        </motion.div>
+                        <div>
+                          <span className="font-semibold text-gray-700 dark:text-gray-300">{t.address}:</span>
+                          <p className="text-gray-600 dark:text-gray-400">{restaurantData.location}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Action buttons */}
                       <motion.div 
-                        className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30 mt-1"
-                        initial={{ scale: 0, rotate: -10 }}
-                        whileInView={{ scale: 1, rotate: 0 }}
+                        className={`flex flex-wrap gap-3 mt-8 ${isRTL ? 'justify-end' : 'justify-start'}`}
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         transition={{ 
-                          type: "spring" as const, 
-                          stiffness: 260, 
-                          damping: 20, 
-                          delay: 0.5 
+                          duration: 0.5, 
+                          delay: 0.5,
+                          staggerChildren: 0.1
                         }}
                         viewport={{ once: true }}
-                        whileHover={{ 
-                          scale: 1.2,
-                          rotate: [0, -5, 5, -5, 0],
-                          transition: { 
-                            scale: { duration: 0.2 },
-                            rotate: { duration: 0.5, ease: "easeInOut" }
-                          }
-                        }}
                       >
-                        <MapPin className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                        >
+                          <Button 
+                            icon={Send} 
+                            text={t.visitWebsite} 
+                            primary={true}
+                            isRTL={isRTL}
+                          />
+                        </motion.div>
+                        
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                        >
+                          <Button 
+                            icon={Navigation} 
+                            text={t.getDirections} 
+                            onClick={() => window.open(getDirectionsUrl(restaurantData.location), '_blank')}
+                            isRTL={isRTL}
+                          />
+                        </motion.div>
+                        
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                        >
+                          <Button 
+                            icon={Phone} 
+                            text={t.callNow}
+                            isRTL={isRTL}
+                          />
+                        </motion.div>
+                        
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                        >
+                          <Button 
+                            icon={Bookmark} 
+                            text={expandedDetails === index ? t.lessDetails : t.moreDetails} 
+                            onClick={() => toggleExpand(index)}
+                            isRTL={isRTL}
+                          />
+                        </motion.div>
                       </motion.div>
-                      <div>
-                        <span className="font-semibold text-gray-700 dark:text-gray-300">{t.address}:</span>
-                        <p className="text-gray-600 dark:text-gray-400">{restaurant.location}</p>
-                      </div>
                     </div>
                     
-                    {/* Action buttons */}
-                    <motion.div 
-                      className="flex flex-wrap gap-3 mt-8"
-                      initial={{ opacity: 0, y: 10 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ 
-                        duration: 0.5, 
-                        delay: 0.5,
-                        staggerChildren: 0.1
-                      }}
-                      viewport={{ once: true }}
-                    >
+                    {/* Food image section */}
+                    <div className="w-full md:w-1/2 relative h-96 md:h-auto bg-gray-100 dark:bg-gray-900/20 overflow-hidden">
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 }}
-                        whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                        initial={{ scale: 1 }}
+                        animate={activeIndex === index ? { scale: 1.02 } : { scale: 1 }}
+                        transition={{ duration: 1.5, ease: "easeInOut" }}
+                        className="w-full h-full"
                       >
-                        <Button 
-                          icon={Send} 
-                          text={t.visitWebsite} 
-                          primary={true}
+                        <Image
+                          src={restaurantData.image}
+                          alt={`${restaurantData.name} food`}
+                          fill
+                          className="object-cover"
                         />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent">
+                          {/* Photo overlay content removed as requested */}
+                        </div>
                       </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2 }}
-                        whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                      >
-                        <Button 
-                          icon={Navigation} 
-                          text={t.getDirections} 
-                          onClick={() => window.open(getDirectionsUrl(restaurant.location), '_blank')}
-                        />
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.3 }}
-                        whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                      >
-                        <Button 
-                          icon={Phone} 
-                          text={t.callNow} 
-                        />
-                      </motion.div>
-                      
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        whileHover={{ y: -2, transition: { duration: 0.2 } }}
-                      >
-                        <Button 
-                          icon={Bookmark} 
-                          text={expandedDetails === index ? "Less Details" : "More Details"} 
-                          onClick={() => toggleExpand(index)}
-                        />
-                      </motion.div>
-                    </motion.div>
+                    </div>
                   </div>
-                  
-                  {/* Food image section */}
-                  <div className="w-full md:w-1/2 relative h-96 md:h-auto bg-gray-100 dark:bg-gray-900/20 overflow-hidden">
-                    <motion.div
-                      initial={{ scale: 1 }}
-                      animate={activeIndex === index ? { scale: 1.02 } : { scale: 1 }}
-                      transition={{ duration: 1.5, ease: "easeInOut" }}
-                      className="w-full h-full"
-                    >
-                      <Image
-                        src={restaurant.image}
-                        alt={`${restaurant.name} food`}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent">
-                        {/* Photo overlay content removed as requested */}
-                      </div>
-                    </motion.div>
-                  </div>
-                </div>
+                </motion.div>
               </motion.div>
-            </motion.div>
-          ))}
+            );
+          })}
         </motion.div>
       </div>
     </section>
