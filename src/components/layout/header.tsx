@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import LanguageSwitcher from "./language-switcher";
 import { companyInfo, restaurants } from "@/lib/mock-data";
 
@@ -38,6 +38,7 @@ const translations = {
 };
 
 export default function Header({ locale = "en" }: { locale: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { theme, setTheme } = useTheme();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

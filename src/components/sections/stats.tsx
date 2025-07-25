@@ -11,7 +11,6 @@ import {
   Calendar, 
   MapPin, 
   Globe, 
-  UserPlus,
   LucideIcon
 } from 'lucide-react';
 

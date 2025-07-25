@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { restaurants } from '@/lib/mock-data';
-import { Calendar, Building2, Users, MapPin, Clock, Bookmark, Send, Navigation, Utensils, Phone, LucideIcon } from 'lucide-react';
+import { Calendar, Building2, MapPin, Clock, Bookmark, Send, Navigation, Utensils, Phone, LucideIcon } from 'lucide-react';
 import CountUp from 'react-countup';
 import { useInView } from 'react-intersection-observer';
 

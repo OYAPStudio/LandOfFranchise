@@ -470,6 +470,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
   };
 
   // Handle click on the map background (not on markers)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleMapClick = (event: any) => {
     // Check if the click was directly on the map (not on markers or popups)
     if (event.target && event.target.classList.contains('maplibregl-canvas')) {

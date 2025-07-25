@@ -468,7 +468,7 @@ export default function Hero({ locale = 'en' }: HeroProps) {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="text-2xl md:text-3xl font-bold text-amber-400 mb-2"
             >
-              {currentContent.title}
+              {/* {currentContent.title} */}
             </motion.h2>
             
             <motion.div
@@ -499,7 +499,7 @@ export default function Hero({ locale = 'en' }: HeroProps) {
               transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
               className="text-xl md:text-2xl text-white/90 mb-6"
             >
-              {currentContent.subtitle}
+              {/* {currentContent.subtitle} */}
             </motion.p>
             
             <motion.div
