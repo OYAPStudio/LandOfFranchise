@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { companyInfo } from '@/lib/mock-data';
-import { Building, Calendar, Award, Target, Compass, Heart, LucideIcon } from 'lucide-react';
+import { Building, Calendar, Award, Target, Compass, Heart, LucideIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
 const translations = {
   en: {
@@ -14,7 +14,9 @@ const translations = {
     mission: "Our Mission",
     vision: "Our Vision",
     values: "Our Values",
-    story: "Our Story"
+    story: "Our Story",
+    readMore: "Read more",
+    readLess: "Show less"
   },
   ar: {
     about: "عن الشركة",
@@ -23,7 +25,9 @@ const translations = {
     mission: "مهمتنا",
     vision: "رؤيتنا",
     values: "قيمنا",
-    story: "قصتنا"
+    story: "قصتنا",
+    readMore: "قراءة المزيد",
+    readLess: "عرض أقل"
   }
 };
 
@@ -53,6 +57,7 @@ interface AboutProps {
 
 export default function About({ locale = 'en' }: AboutProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
   
   useEffect(() => {
     setIsMounted(true);
@@ -64,6 +69,11 @@ export default function About({ locale = 'en' }: AboutProps) {
   
   // Get company info based on current locale
   const companyData = companyInfo[currentLocale];
+
+  // Use the new long description text
+  const fullDescription = companyData.longDescription;
+  // Show only the first paragraph for the truncated version
+  const truncatedDescription = fullDescription.split('\n')[0] + '...';
 
   // Animation variants
   const fadeInUp = {
@@ -78,6 +88,10 @@ export default function About({ locale = 'en' }: AboutProps) {
     })
   };
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   if (!isMounted) {
     return null; // Prevent hydration issues
   }
@@ -89,27 +103,32 @@ export default function About({ locale = 'en' }: AboutProps) {
         currentLocale === 'ar' ? 'rtl' : 'ltr'
       }`}
     >
+      {/* Fixed heights for the main container to prevent layout shifts */}
       <div className={`flex flex-col ${currentLocale === 'ar' ? 'md:flex-row-reverse' : 'md:flex-row'}`}>
-        {/* Left column - Image with parallax effect */}
-        <div className="w-full md:w-1/2 relative aspect-[4/3] min-h-[300px] md:min-h-0 overflow-hidden flex items-center justify-center">
-          <motion.div
-            initial={{ scale: 1.1 }}
-            whileInView={{ scale: 1 }}
-            transition={{ duration: 1.5 }}
-            viewport={{ once: true }}
-            className="h-full w-full relative flex items-center justify-center"
-          >
-            <Image
-              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
-              alt="Traditional Iraqi restaurant interior"
-              fill
-              className="object-cover object-center"
-            />
-            <div className={`absolute inset-0 bg-gradient-to-${currentLocale === 'ar' ? 'l' : 'r'} from-white/70 to-transparent dark:from-gray-900/70`}></div>
-          </motion.div>
+        {/* Left column - Image with fixed size */}
+        <div className="w-full md:w-1/2 relative aspect-[4/3] min-h-[300px] md:min-h-0 overflow-hidden">
+          {/* Fixed position and size for image container */}
+          <div className="absolute inset-0">
+            <motion.div
+              initial={{ scale: 1.1 }}
+              whileInView={{ scale: 1 }}
+              transition={{ duration: 1.5 }}
+              viewport={{ once: true }}
+              className="h-full w-full"
+            >
+              <Image
+                src="/images/restaurants/AWS09315.jpg"
+                alt="Traditional Iraqi restaurant interior"
+                fill
+                className="object-cover object-center"
+                priority
+              />
+              <div className={`absolute inset-0 bg-gradient-to-${currentLocale === 'ar' ? 'l' : 'r'} from-white/70 to-transparent dark:from-gray-900/70`}></div>
+            </motion.div>
+          </div>
           
           {/* Text overlay on the image */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 text-gray-800 dark:text-gray-200">
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 text-gray-800 dark:text-gray-200 z-10">
             <motion.div 
               className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-6"
               initial={{ opacity: 0, y: 30 }}
@@ -175,9 +194,36 @@ export default function About({ locale = 'en' }: AboutProps) {
                   {t.story}
                 </h3>
               </div>
-              <p className={`text-gray-700 dark:text-gray-300 ${currentLocale === 'ar' ? 'text-right' : 'text-left'}`}>
-                {companyData.longDescription}
-              </p>
+              
+              {/* Our Story section with Read More functionality - Fixed height container */}
+              <div className={`${currentLocale === 'ar' ? 'text-right' : 'text-left'}`}>
+                <div className="overflow-y-auto">
+                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line transition-all duration-300 ease-in-out">
+                    {isExpanded ? fullDescription : truncatedDescription}
+                  </p>
+                </div>
+                
+                <motion.button
+                  onClick={toggleExpand}
+                  className={`mt-3 flex items-center text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 font-medium transition-all duration-300 ${
+                    currentLocale === 'ar' ? 'mr-auto' : 'ml-auto'
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isExpanded ? (
+                    <>
+                      {t.readLess} 
+                      <ChevronUp className={`w-4 h-4 ${currentLocale === 'ar' ? 'ml-1' : 'ml-1'}`} />
+                    </>
+                  ) : (
+                    <>
+                      {t.readMore}
+                      <ChevronDown className={`w-4 h-4 ${currentLocale === 'ar' ? 'ml-1' : 'ml-1'}`} />
+                    </>
+                  )}
+                </motion.button>
+              </div>
             </motion.div>
             
             <motion.div 

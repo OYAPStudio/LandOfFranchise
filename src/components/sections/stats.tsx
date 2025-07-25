@@ -279,7 +279,7 @@ export default function StatsSection({ locale = 'en' }: StatsProps) {
             />
           </motion.div>
 
-          <motion.div 
+          {/* <motion.div 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
@@ -292,7 +292,7 @@ export default function StatsSection({ locale = 'en' }: StatsProps) {
               delay={0.7}
               color="teal"
             />
-          </motion.div>
+          </motion.div> */}
         </div>
       </div>
     </section>

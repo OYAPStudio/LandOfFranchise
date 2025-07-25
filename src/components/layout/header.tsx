@@ -284,7 +284,7 @@ export default function Header({ locale = "en" }: { locale: string }) {
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
             <LanguageSwitcher currentLocale={locale} />
 
-            <button
+            {/* <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               className={`p-1.5 rounded-full transition-colors ${
                 scrolled
@@ -294,7 +294,7 @@ export default function Header({ locale = "en" }: { locale: string }) {
               aria-label="Toggle theme"
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            </button> */}
 
             {/* Mobile menu button */}
             <button

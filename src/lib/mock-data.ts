@@ -7,7 +7,6 @@ export interface RestaurantContent {
   logo: string;
   cuisineType: string;
   openingHours: string;
-  employeeCount: number;
   foundedYear: number;
   specialties: string;
 }
@@ -54,6 +53,29 @@ export interface CompanyInfo {
   };
 }
 
+// Function to calculate years in business dynamically
+export function calculateYearsInBusiness(): number {
+  // Founding date: July 10, 2020
+  const foundingDate = new Date(2020, 6, 10); // Note: months are 0-indexed in JavaScript
+  const currentDate = new Date();
+  
+  // Calculate the difference in years
+  let years = currentDate.getFullYear() - foundingDate.getFullYear();
+  
+  // Check if we've reached the anniversary date this year
+  const hasReachedAnniversary = 
+    currentDate.getMonth() > foundingDate.getMonth() || 
+    (currentDate.getMonth() === foundingDate.getMonth() && 
+     currentDate.getDate() >= foundingDate.getDate());
+  
+  // If we haven't reached the anniversary date this year, subtract one year
+  if (!hasReachedAnniversary) {
+    years--;
+  }
+  
+  return years;
+}
+
 export const restaurants: Restaurant[] = [
   {
     id: "rest-1",
@@ -66,7 +88,6 @@ export const restaurants: Restaurant[] = [
       logo: "/images/restaurants/L2.jpg",
       cuisineType: "Middle Eastern",
       openingHours: "11:00 AM - 11:00 PM",
-      employeeCount: 45,
       foundedYear: 2018,
       specialties: "Syrian Shawarma & Fast Food"
     },
@@ -79,7 +100,6 @@ export const restaurants: Restaurant[] = [
       logo: "/images/restaurants/L2.jpg",
       cuisineType: "مأكولات شرق أوسطية",
       openingHours: "11:00 صباحاً - 11:00 مساءً",
-      employeeCount: 45,
       foundedYear: 2018,
       specialties: "شاورما سورية ووجبات سريعة"
     }
@@ -95,7 +115,6 @@ export const restaurants: Restaurant[] = [
       logo: "/images/restaurants/L1.jpg",
       cuisineType: "Iraqi Fusion",
       openingHours: "12:00 PM - 10:00 PM",
-      employeeCount: 38,
       foundedYear: 2022,
       specialties: "Luxuries Food"
     },
@@ -108,7 +127,6 @@ export const restaurants: Restaurant[] = [
       logo: "/images/restaurants/L1.jpg",
       cuisineType: "مطبخ عراقي مدمج",
       openingHours: "12:00 ظهراً - 10:00 مساءً",
-      employeeCount: 38,
       foundedYear: 2022,
       specialties: "أطباق فاخرة"
     }
@@ -124,7 +142,6 @@ export const restaurants: Restaurant[] = [
       logo: "/images/restaurants/L3.jpg",
       cuisineType: "Traditional Iraqi",
       openingHours: "11:00 AM - 11:00 PM",
-      employeeCount: 52,
       foundedYear: 2023,
       specialties: "All Kinds of Coffee"
     },
@@ -137,19 +154,20 @@ export const restaurants: Restaurant[] = [
       logo: "/images/restaurants/L3.jpg",
       cuisineType: "مطبخ عراقي تقليدي",
       openingHours: "11:00 صباحاً - 11:00 مساءً",
-      employeeCount: 52,
+      // employeeCount: 52,
       foundedYear: 2023,
       specialties: "جميع أنواع القهوة"
     }
   }
 ];
 
+// Use the dynamic calculation for years in business
 export const companyStats: CompanyStats = {
-  totalRestaurants: 3,
-  totalEmployees: 135,
-  yearsInBusiness: 15,
+  totalRestaurants: 4,
+  totalEmployees: 250,
+  yearsInBusiness: calculateYearsInBusiness(),
   locations: 6,
-  countriesPresent: 2,
+  countriesPresent: 1,
   annualCustomers: 250000
 };
 
@@ -158,11 +176,11 @@ export const companyInfo: CompanyInfo = {
     name: "Land Of Franchise",
     tagline: "Bringing the authentic flavors of Iraq to the world",
     shortDescription: "A premier restaurant group dedicated to showcasing the rich culinary heritage of Land Of Franchise with modern influences.",
-    longDescription: "In the midst of the COVID-19 pandemic, four friends came together daily to escape the isolation. From those moments, the idea of a Syrian shawarma shop in Mosul was born. What started in October 2020 as a small takeaway location quickly grew into a leading destination. Over the years, our vision expanded into multiple brands, shaping the future of dining in Mosul.",
+    longDescription: "Our Story:\nIn the midst of the challenging times during the COVID-19 pandemic, four friends came together daily to share moments and break the routine of isolation. From those shared moments, the idea of opening a Syrian shawarma shop in Mosul was born. In October 2020, we launched our first small location focused on takeaway and delivery. Over time, we became a leading destination for high-quality Syrian shawarma in the city. After a year of success, we moved to a larger location directly across from our original site.\nIn 2022, we decided to expand our business and began planning a new brand — \"Lamassu Restaurant.\" In September 2023, we officially opened Lamassu, offering a refined, five-star dining experience — the first of its kind in Mosul. The restaurant quickly became a preferred destination, known for its exceptional service and luxurious ambiance.\nFollowing the great success of Lamassu, we continued our expansion. In 2024, we launched a new coffee brand called START COFFEE, with the first branch located inside the Ninawa Court of Appeals. It became the first well-organized, high-standard coffee shop inside a government building in the province.\nIn June 2025, we proudly opened our second Shawarma Land branch. Alongside it, we launched Mosul's first centralized kitchen, built to meet rigorous hygiene, health, and civil defense standards. In August 2025, we also opened our second START COFFEE branch at the Personal Status Court in Mosul.\nBefore the end of 2025, we plan to launch our fourth brand: 4IN, a new fast-food concept.\nBy the grace of God, we have become the go-to destination for businesspeople, investors, government officials, tourists, and more — a true reflection of our commitment to delivering a unique and exceptional experience to every customer.",
     headquarters: "Mosul, Iraq",
-    foundedYear: 2018,
+    foundedYear: 2020, // Updated to match the founding date in the story
     ceoName: "Ahmed Al-Jabouri",
-    mission: "Our mission is to deliver exceptional food and beverage experiences that combine high quality with outstanding service. We are committed to creating innovative concepts that meet our customers’ needs and exceed their expectations at every turn.",
+    mission: "Our mission is to deliver exceptional food and beverage experiences that combine high quality with outstanding service. We are committed to creating innovative concepts that meet our customers' needs and exceed their expectations at every turn.",
     vision: "Our vision is to become the leaders in the hospitality industry in our city, with a focus on innovation and excellence in every aspect of our work. We aspire to be the top choice for consumers seeking a unique and memorable dining experience.",
     values: [
       "High-quality service and standards",
@@ -173,12 +191,12 @@ export const companyInfo: CompanyInfo = {
     ]
   },
   ar: {
-    name: "أرض الفرانشايز",
-    tagline: "نُقدِّم نكهات العراق الأصيلة إلى العالم",
+    name: "أرض الأمتياز",
+    tagline: "نُقدِّم نكهات العراق الأصيلة إلى العالم",
     shortDescription: "مجموعة مطاعم متميزة تسعى لإبراز التراث العراقي الأصيل بنكهات معاصرة.",
-    longDescription: "في خضم جائحة كورونا، اجتمع أربعة أصدقاء يومياً لكسر روتين العزلة، ومن تلك اللقاءات وُلدت فكرة إنشاء محل شاورما سوري في الموصل. بدأنا في أكتوبر 2020 بمحل صغير للطلبات الخارجية والتوصيل. ومع مرور الوقت، أصبحنا وجهة مفضلة لعشاق الشاورما في المدينة. توسعنا لاحقًا ليشمل عدة علامات تجارية تعكس رؤيتنا المستقبلية في عالم الطهي.",
+    longDescription: "قصتنا:\nفي خضم التحديات خلال جائحة كوفيد-19، اجتمع أربعة أصدقاء يومياً لمشاركة اللحظات وكسر روتين العزلة. من تلك اللحظات المشتركة، وُلدت فكرة افتتاح محل شاورما سوري في الموصل. في أكتوبر 2020، افتتحنا أول موقع صغير لنا يركز على الطلبات الخارجية والتوصيل. مع مرور الوقت، أصبحنا وجهة رائدة للشاورما السورية عالية الجودة في المدينة. بعد عام من النجاح، انتقلنا إلى موقع أكبر مقابل موقعنا الأصلي مباشرة.\nفي عام 2022، قررنا توسيع أعمالنا وبدأنا التخطيط لعلامة تجارية جديدة - \"مطعم لاماسو\". في سبتمبر 2023، افتتحنا رسمياً لاماسو، لنقدم تجربة طعام راقية من فئة الخمس نجوم - الأولى من نوعها في الموصل. سرعان ما أصبح المطعم وجهة مفضلة، معروفة بخدمتها الاستثنائية وأجوائها الفاخرة.\nبعد النجاح الكبير لمطعم لاماسو، واصلنا توسعنا. في عام 2024، أطلقنا علامة تجارية جديدة للقهوة تسمى START COFFEE، مع أول فرع داخل محكمة استئناف نينوى. أصبح أول مقهى منظم بمعايير عالية داخل مبنى حكومي في المحافظة.\nفي يونيو 2025، افتتحنا بفخر فرعنا الثاني من شاورما لاند. إلى جانبه، أطلقنا أول مطبخ مركزي في الموصل، مبني وفق معايير صارمة للنظافة والصحة والدفاع المدني. وفي أغسطس 2025، افتتحنا أيضاً فرعنا الثاني من START COFFEE في محكمة الأحوال الشخصية في الموصل.\nقبل نهاية عام 2025، نخطط لإطلاق علامتنا التجارية الرابعة: 4IN، وهي مفهوم جديد للوجبات السريعة.\nبفضل الله، أصبحنا الوجهة المفضلة لرجال الأعمال والمستثمرين والمسؤولين الحكوميين والسياح وغيرهم - انعكاس حقيقي لالتزامنا بتقديم تجربة فريدة واستثنائية لكل عميل.",
     headquarters: "الموصل، العراق",
-    foundedYear: 2018,
+    foundedYear: 2020, // Updated to match the founding date in the story
     ceoName: "أحمد الجبوري",
     mission: "مهمتنا هي تقديم تجربة طعام وشراب استثنائية تجمع بين الجودة العالية والخدمة المميزة. نلتزم بابتكار مفاهيم جديدة تلبي احتياجات عملائنا وتتجاوز توقعاتهم في كل مرة.",
     vision: "رؤيتنا أن نكون رواد الضيافة في مدينتنا، من خلال الابتكار والتميز في جميع جوانب عملنا. نطمح لأن نكون الخيار الأول لمن يبحث عن تجربة طعام فريدة ولا تُنسى.",

@@ -9,7 +9,7 @@ interface CompanyHistoryProps {
 
 const translations = {
   en: {
-    since: "Since 2008",
+    since: "Since 2020",
     journey: "Our Journey",
     legacy: "A legacy of culinary excellence, innovation, and heartfelt hospitality spanning over a decade",
     restaurants: "Restaurants",
@@ -28,7 +28,7 @@ const translations = {
     teamMembers: "Team Members"
   },
   ar: {
-    since: "منذ 2008",
+    since: "منذ 2020",
     journey: "رحلتنا",
     legacy: "إرث من التميز الطهي والابتكار والضيافة القلبية على مدى عقد من الزمان",
     restaurants: "مطاعم",
@@ -76,7 +76,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       },
       icon: Utensils,
       color: "from-red-500 to-orange-600",
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2847&auto=format&fit=crop",
+      image: "/images/restaurants/AWS1.jpg",
       stats: { locations: 1, customers: "100+", team: 5 }
     },
     {
@@ -95,7 +95,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       },
       icon: TrendingUp,
       color: "from-yellow-500 to-orange-400",
-      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2847&auto=format&fit=crop",
+      image: "/images/restaurants/AWS2.jpg",
       stats: { locations: 1, customers: "300+", team: 12 }
     },
     {
@@ -118,7 +118,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       stats: { locations: 1, customers: "500+", team: 20 }
     },
     {
-      year: 2023,
+      year: "2023-September",
       title: {
         en: "Lamassu Restaurant Opens",
         ar: "افتتاح مطعم لاماسو"
@@ -137,7 +137,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       stats: { locations: 2, customers: "1,000+", team: 35 }
     },
     {
-      year: 2024,
+      year: "2024-July",
       title: {
         en: "START COFFEE Launch",
         ar: "إطلاق ستارت كوفي"
@@ -156,7 +156,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       stats: { locations: 3, customers: "1,500+", team: 45 }
     },
     {
-      year: 2025,
+      year: "2025-June",
       title: {
         en: "Central Kitchen & New Branches",
         ar: "المطبخ المركزي والفروع الجديدة"
@@ -173,9 +173,27 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       color: "from-amber-500 to-yellow-600",
       image: "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?q=80&w=2942&auto=format&fit=crop",
       stats: { locations: 5, customers: "2,500+", team: 75 }
+    },{
+      year: "2025-Augest",
+      title: {
+        en: "Central Kitchen & New Branches",
+        ar: "المطبخ المركزي والفروع الجديدة"
+      },
+      subtitle: {
+        en: "Major Expansion",
+        ar: "توسع كبير"
+      },
+      description: {
+        en: "In Augest 2025, we successfully opened our START COFFEE branch.",
+        ar: "في حزيران من عام 2025 نجحنا في افتتاح فرعنا الثاني لبراند شاورما لاند، حيث رافق افتتاح هذا الفرع، افتتاح اول مطبخ مركزي في مدينة الموصل مطابق للمواصفات القياسية، تم فيه مراعاة جميع الشروط من حيث النظافة والصحة والدفاع المدني، وفي شهر آب من عام 2025 أيضاً قمنا بافتتاح فرعنا الثاني لستارت كوفي."
+      },
+      icon: Star,
+      color: "from-amber-500 to-yellow-600",
+      image: "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?q=80&w=2942&auto=format&fit=crop",
+      stats: { locations: 5, customers: "2,500+", team: 75 }
     },
     {
-      year: 2026,
+      year: "2025-October",
       title: {
         en: "4IN Fast Food Brand",
         ar: "براند 4IN للطعام السريع"

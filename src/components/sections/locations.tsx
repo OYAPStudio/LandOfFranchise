@@ -197,7 +197,10 @@ const CustomMarker = ({ country, isActive, onClick }: { country: Country; isActi
           damping: 20,
           delay: country.delay * 0.1
         }}
-        onClick={() => onClick(country)}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevent event from bubbling to the map
+          onClick(country);
+        }}
       >
         <div className={`absolute w-12 h-12 rounded-full bg-amber-500/50 animate-ping ${isActive ? 'opacity-70' : 'opacity-40'}`}></div>
         <div className="relative flex flex-col items-center">
@@ -238,7 +241,7 @@ const BranchPopup = ({ branch, country, t, onClose }: { branch: Branch; country:
       className="z-50"
       offset={25}
     >
-      <div className="p-3 max-w-sm">
+      <div className="p-3 max-w-sm" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-lg font-bold text-gray-900 mb-2">{branch.name}</h3>
         <div className="space-y-2 text-sm">
           <div className="flex items-start">
@@ -311,7 +314,10 @@ const CountryBranchMarkers = ({ country, selectedBranch, onBranchClick }: { coun
                 damping: 20,
                 delay: 0.1
               }}
-              onClick={() => onBranchClick(branch)}
+              onClick={(e) => {
+                e.stopPropagation(); // Prevent event from bubbling to the map
+                onBranchClick(branch);
+              }}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-amber-600' : 'bg-amber-500'}`}>
                 <Building className="w-4 h-4 text-white" />
@@ -332,6 +338,9 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
     }
   }, []);
 
+  // Mosul coordinates for direct zoom
+  const mosulCoordinates: [number, number] = [43.1389, 36.3456];
+
   // Country data
   const countryData: Country[] = [
     {
@@ -341,8 +350,8 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
       scale: 1.0,
       delay: 0.3,
       status: 'active',
-      locations: 3,
-      flagship: 'Baghdad',
+      locations: 7,
+      flagship: 'Mosul',
       branches: [
         {
           id: 'branch1',
@@ -350,7 +359,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: '36.3692944, 43.1416558',
           phone: '+964 123 456 7890',
           hours: '8:00 AM - 11:00 PM',
-          coordinates: '36.3692944, 43.1416558'
+          coordinates: '36.3696607,43.1417624'
         },
         {
           id: 'branch2',
@@ -358,56 +367,43 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: '36.3644714, 43.1464652',
           phone: '+964 123 456 7891',
           hours: '9:00 AM - 10:00 PM',
-          coordinates: '36.3644714, 43.1464652'
+          coordinates: '36.3610361,43.145714'
         },
         {
           id: 'branch3',
-          name: 'Start Coffee',
+          name: 'Start Coffee 1',
           address: 'Presidency of the Nineveh Federal Court of Appeal, Mosul',
           phone: '+964 123 456 7892',
           hours: '10:00 AM - 11:00 PM',
-          coordinates: '36.342818, 43.1574593'
+          coordinates: '36.3354188,43.1404843'
+        },
+        {
+          id: 'branch5',
+          name: 'Start Coffee 2',
+          address: 'Presidency of the Nineveh Federal Court of Appeal, Mosul',
+          phone: '+964 123 456 7892',
+          hours: '10:00 AM - 11:00 PM',
+          coordinates: '36.33702,43.142434'
+        },
+        {
+          id: 'branch4',
+          name: 'Shawrma Land Restaurant 2',
+          address: '36.3692944, 43.1416558',
+          phone: '+964 123 456 7890',
+          hours: '8:00 AM - 11:00 PM',
+          coordinates: '36.3874888,43.1593435'
+        },
+        {
+          id: 'branch6',
+          name: '4 IN',
+          address: '36.3692944, 43.1416558',
+          phone: '+964 123 456 7890',
+          hours: '8:00 AM - 11:00 PM',
+          coordinates: '36.369895,43.142044'
         },
       ],
       mapCoordinates: [44.3661, 33.3152],
     },
-    {
-      id: 'saudi',
-      name: 'Saudi Arabia',
-      position: { top: '56%', right: '50%' },
-      scale: 0.9,
-      delay: 0.5,
-      status: 'active',
-      locations: 3,
-      flagship: 'Riyadh',
-      branches: [
-        {
-          id: 'saudi1',
-          name: 'Shawrma Land Restaurant',
-          address: 'Kingdom Center, King Fahd Road, Riyadh',
-          phone: '+966 12 345 6789',
-          hours: '9:00 AM - 12:00 AM',
-          coordinates: '24.7111, 46.7243'
-        },
-        {
-          id: 'saudi2',
-          name: 'Lamassu Restaurant',
-          address: 'Corniche Road, Jeddah',
-          phone: '+966 12 345 6780',
-          hours: '8:00 AM - 1:00 AM',
-          coordinates: '21.5169, 39.1653'
-        },
-        {
-          id: 'saudi3',
-          name: 'Start Coffee',
-          address: 'Corniche Road, Dammam',
-          phone: '+966 12 345 6781',
-          hours: '10:00 AM - 11:00 PM',
-          coordinates: '26.4367, 50.1039'
-        }
-      ],
-      mapCoordinates: [46.7243, 24.7111],
-    }
   ];
 
   const t = translations[locale as keyof typeof translations] || translations.en;
@@ -420,6 +416,9 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
     bearing: 0,
     pitch: 0
   });
+  
+  // State to control map visibility
+  const [isMapVisible, setIsMapVisible] = useState(true);
 
   useEffect(() => {
     setSelectedBranch(null);
@@ -427,13 +426,23 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
 
   const handleCountryClick = (country: Country) => {
     setSelectedCountry(country);
-    const [lng, lat] = country.mapCoordinates;
-    setViewState({
-      ...viewState,
-      longitude: lng,
-      latitude: lat,
-      zoom: 5
-    });
+    // If Iraq is selected, zoom directly to Mosul instead of the country center
+    if (country.id === 'iraq') {
+      setViewState({
+        ...viewState,
+        longitude: mosulCoordinates[0],
+        latitude: mosulCoordinates[1],
+        zoom: 10.5 // Higher zoom level for city view
+      });
+    } else {
+      const [lng, lat] = country.mapCoordinates;
+      setViewState({
+        ...viewState,
+        longitude: lng,
+        latitude: lat,
+        zoom: 5
+      });
+    }
   };
 
   const handleBranchClick = (branch: Branch) => {
@@ -443,13 +452,14 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
       ...viewState,
       longitude: lng,
       latitude: lat,
-      zoom: 12
+      zoom: 11
     });
   };
 
   const handleBackClick = () => {
     setSelectedBranch(null);
     setSelectedCountry(null);
+    setIsMapVisible(true); // Ensure map is visible when going back
     setViewState({
       longitude: 45,
       latitude: 28,
@@ -457,6 +467,14 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
       bearing: 0,
       pitch: 0
     });
+  };
+
+  // Handle click on the map background (not on markers)
+  const handleMapClick = (event: any) => {
+    // Check if the click was directly on the map (not on markers or popups)
+    if (event.target && event.target.classList.contains('maplibregl-canvas')) {
+      setIsMapVisible(false); // Hide the map
+    }
   };
 
   return (
@@ -496,92 +514,105 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
 
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-2/3">
-            <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl">
-              {/* Interactive Map */}
-              <Map
-                {...viewState}
-                onMove={evt => setViewState(evt.viewState)}
-                mapStyle="https://api.maptiler.com/maps/basic-v2/style.json?key=mUozmEO28XDI7F1BKx1o"
-                reuseMaps
-                attributionControl={false}
-                style={{ width: '100%', height: '100%' }}
-              >
-                {/* Show country markers in overview mode */}
-                {!selectedCountry && countryData.map(country => (
-                  <CustomMarker 
-                    key={country.id}
-                    country={country}
-                    isActive={false}
-                    onClick={handleCountryClick}
-                  />
-                ))}
+            {isMapVisible ? (
+              <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl">
+                {/* Interactive Map */}
+                <Map
+                  {...viewState}
+                  onMove={evt => setViewState(evt.viewState)}
+                  mapStyle="https://api.maptiler.com/maps/basic-v2/style.json?key=mUozmEO28XDI7F1BKx1o"
+                  reuseMaps
+                  attributionControl={false}
+                  style={{ width: '100%', height: '100%' }}
+                  onClick={handleMapClick}
+                >
+                  {/* Show country markers in overview mode */}
+                  {!selectedCountry && countryData.map(country => (
+                    <CustomMarker 
+                      key={country.id}
+                      country={country}
+                      isActive={false}
+                      onClick={handleCountryClick}
+                    />
+                  ))}
+                  
+                  {/* Show branch markers when a country is selected */}
+                  {selectedCountry && (
+                    <CountryBranchMarkers 
+                      country={selectedCountry}
+                      selectedBranch={selectedBranch}
+                      onBranchClick={handleBranchClick}
+                    />
+                  )}
+                  
+                  {/* Show popup for selected branch */}
+                  {selectedBranch && (
+                    <BranchPopup 
+                      branch={selectedBranch} 
+                      country={selectedCountry!}
+                      t={t}
+                      onClose={() => setSelectedBranch(null)}
+                    />
+                  )}
+                  
+                  {/* Controls */}
+                  <NavigationControl position="top-right" />
+                  <FullscreenControl position="top-right" />
+                </Map>
                 
-                {/* Show branch markers when a country is selected */}
+                {/* Back button */}
                 {selectedCountry && (
-                  <CountryBranchMarkers 
-                    country={selectedCountry}
-                    selectedBranch={selectedBranch}
-                    onBranchClick={handleBranchClick}
-                  />
+                  <motion.button
+                    className="absolute top-4 left-4 z-20 flex items-center text-gray-800 bg-white px-3 py-2 rounded-md shadow-md font-medium"
+                    onClick={handleBackClick}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <ChevronRight className="w-5 h-5 mr-1 rotate-180" />
+                    {t.back}
+                  </motion.button>
                 )}
                 
-                {/* Show popup for selected branch */}
-                {selectedBranch && (
-                  <BranchPopup 
-                    branch={selectedBranch} 
-                    country={selectedCountry!}
-                    t={t}
-                    onClose={() => setSelectedBranch(null)}
-                  />
+                {/* Map Stats */}
+                {!selectedCountry && (
+                  <motion.div 
+                    className="absolute top-4 right-16 bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg"
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 }}
+                    viewport={{ once: true }}
+                  >
+                    <h3 className="font-bold text-amber-600 dark:text-amber-500 mb-2 flex items-center">
+                      <Globe className="w-4 h-4 mr-1" />
+                      {t.internationalPresence}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">{t.countriesWithPresence}:</span>
+                        <span className="font-bold text-gray-900 dark:text-white">{countryData.length}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">{t.currentLocations}:</span>
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {countryData.reduce((sum, country) => sum + country.locations, 0)}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
                 )}
-                
-                {/* Controls */}
-                <NavigationControl position="top-right" />
-                <FullscreenControl position="top-right" />
-              </Map>
-              
-              {/* Back button */}
-              {selectedCountry && (
-                <motion.button
-                  className="absolute top-4 left-4 z-20 flex items-center text-gray-800 bg-white px-3 py-2 rounded-md shadow-md font-medium"
-                  onClick={handleBackClick}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  whileTap={{ scale: 0.95 }}
+              </div>
+            ) : (
+              <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <button 
+                  onClick={() => setIsMapVisible(true)}
+                  className="px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium shadow-lg transition-all flex items-center"
                 >
-                  <ChevronRight className="w-5 h-5 mr-1 rotate-180" />
-                  {t.back}
-                </motion.button>
-              )}
-              
-              {/* Map Stats */}
-              {!selectedCountry && (
-                <motion.div 
-                  className="absolute top-4 right-16 bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg"
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.8 }}
-                  viewport={{ once: true }}
-                >
-                  <h3 className="font-bold text-amber-600 dark:text-amber-500 mb-2 flex items-center">
-                    <Globe className="w-4 h-4 mr-1" />
-                    {t.internationalPresence}
-                  </h3>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">{t.countriesWithPresence}:</span>
-                      <span className="font-bold text-gray-900 dark:text-white">{countryData.length}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">{t.currentLocations}:</span>
-                      <span className="font-bold text-gray-900 dark:text-white">
-                        {countryData.reduce((sum, country) => sum + country.locations, 0)}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </div>
+                  <MapPin className="w-5 h-5 mr-2" />
+                  {t.viewAll}
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="w-full lg:w-1/3">
@@ -609,7 +640,10 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 * index }}
                         viewport={{ once: true }}
-                        onClick={() => handleCountryClick(country)}
+                        onClick={() => {
+                          handleCountryClick(country);
+                          setIsMapVisible(true); // Ensure map is visible when selecting a country
+                        }}
                       >
                         <div className="flex items-center">
                           <div className="w-3 h-3 rounded-full bg-amber-500 mr-3"></div>
@@ -666,7 +700,10 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * index }}
-                        onClick={() => handleBranchClick(branch)}
+                        onClick={() => {
+                          handleBranchClick(branch);
+                          setIsMapVisible(true); // Ensure map is visible when selecting a branch
+                        }}
                       >
                         <div className="font-bold text-gray-900 dark:text-white mb-1">{branch.name}</div>
                         <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
@@ -681,7 +718,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
             </motion.div>
           </div>
         </div>
-      </div>
+        </div>
     </section>
-  );
+ );
 }

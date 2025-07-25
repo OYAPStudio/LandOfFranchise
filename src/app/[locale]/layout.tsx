@@ -65,7 +65,7 @@ export default async function RootLayout({
       <body className="overflow-x-hidden" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

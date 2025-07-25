@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { companyInfo } from '@/lib/mock-data';
-import { Instagram, Facebook, Twitter, Mail, Phone, MapPin } from 'lucide-react';
+import { Instagram, Facebook, Twitter, Mail, Phone, MapPin, Mailbox } from 'lucide-react';
 
 const translations = {
   en: {
@@ -162,13 +162,19 @@ export default function Footer({ locale: propLocale }: FooterProps = {}) {
                   {companyData.headquarters}
                 </span>
               </li>
+              <li className={`flex items-start ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                <Mailbox size={20} className={`${iconClass} mt-1 flex-shrink-0 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
+                <span className={textMutedClass}>
+                  {isRTL ? 'صندوق بريد: 11079,  جامعة الموصل, الموصل, العراق' : 'P.O. Box 11079, University Of Mosul, Mosul, Iraq'}
+                </span>
+              </li>
               <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <Phone size={20} className={`${iconClass} flex-shrink-0 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
                 <span className={textMutedClass}>+964 123 456 7890</span>
               </li>
               <li className={`flex items-center ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
                 <Mail size={20} className={`${iconClass} flex-shrink-0 ${isRTL ? 'ml-2 mr-0' : 'mr-2 ml-0'}`} />
-                <span className={textMutedClass}>info@landoffranchise.com</span>
+                <span className={textMutedClass}>info@landoffranchise.iq</span>
               </li>
             </ul>
           </div>

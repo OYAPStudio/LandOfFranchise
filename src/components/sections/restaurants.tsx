@@ -366,30 +366,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                           </span>
                         </div>
                         
-                        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                          <motion.div 
-                            className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/30"
-                            initial={{ scale: 0, rotate: -10 }}
-                            whileInView={{ scale: 1, rotate: 0 }}
-                            transition={{ 
-                              type: "spring" as const, 
-                              stiffness: 260, 
-                              damping: 20, 
-                              delay: 0.2 
-                            }}
-                            viewport={{ once: true }}
-                            whileHover={{ 
-                              scale: 1.1,
-                              backgroundColor: "#FEF3C7",
-                              transition: { duration: 0.2 }
-                            }}
-                          >
-                            <Users className="w-4 h-4 text-amber-600 dark:text-amber-500 flex-shrink-0" />
-                          </motion.div>
-                          <span className={`text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
-                            <span className="font-semibold">{t.employees}:</span> <AnimatedCounter value={restaurantData.employeeCount} />
-                          </span>
-                        </div>
+
 
                         <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                           <motion.div 
