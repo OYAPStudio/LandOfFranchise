@@ -158,6 +158,33 @@ export const restaurants: Restaurant[] = [
       foundedYear: 2023,
       specialties: "جميع أنواع القهوة"
     }
+  },{
+    id: "rest-4",
+    en: {
+      name: "4 In",
+      description: "Inspired by the ancient hanging gardens, our restaurant offers a unique dining experience with authentic Mesopotamian recipes.",
+      location: "Mosul, Iraq",
+      coordinates: [36.1911, 44.0091],
+      image: "",
+      logo: "",
+      cuisineType: "Traditional Iraqi",
+      openingHours: "11:00 AM - 11:00 PM",
+      foundedYear: 2023,
+      specialties: "All Kinds of Coffee"
+    },
+    ar: {
+      name: "4 In",
+      description: "مستوحاة من حدائق بابل المعلقة، تقدم مقهى ستارت تجربة مميزة بوصفات مزجت بين الأصالة والابتكار.",
+      location: "الموصل، العراق",
+      coordinates: [36.1911, 44.0091],
+      image: "",
+      logo: "",
+      cuisineType: "مطبخ عراقي تقليدي",
+      openingHours: "11:00 صباحاً - 11:00 مساءً",
+      // employeeCount: 52,
+      foundedYear: 2023,
+      specialties: "جميع أنواع القهوة"
+    }
   }
 ];
 

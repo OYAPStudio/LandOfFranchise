@@ -20,7 +20,8 @@ const translations = {
     awards: "Awards",
     contact: "Contact",
     brands: "Brands",
-    visit: "Visit"
+    visit: "Visit",
+    joinUs: "Join Us"
   },
   ar: {
     home: "الرئيسية",
@@ -33,7 +34,8 @@ const translations = {
     awards: "الجوائز",
     contact: "اتصل بنا",
     brands: "العلامات التجارية",
-    visit: "زيارة"
+    visit: "زيارة",
+    joinUs: "انضم إلينا"
   }
 };
 
@@ -96,6 +98,7 @@ export default function Header({ locale = "en" }: { locale: string }) {
 
   // Ensure links include the locale prefix
   const getLink = (hash: string) => `/${locale}${hash}`;
+  const getPageLink = (page: string) => `/${locale}/${page}`;
 
   // Prevent hydration issues by not rendering theme-dependent content until mounted
   if (!isMounted) {
@@ -280,22 +283,19 @@ export default function Header({ locale = "en" }: { locale: string }) {
             }`}>
               {t.restaurants}
             </Link>
+
+            {/* Join Us Page Link */}
+            <Link href={getPageLink('join-us')} className={`text-sm py-1 px-3 rounded-full border-2 transition-all duration-300 ${
+              scrolled 
+                ? "border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-400 dark:hover:text-gray-900" 
+                : "border-amber-300 text-amber-300 hover:bg-amber-300 hover:text-gray-900"
+            }`}>
+              {t.joinUs}
+            </Link>
           </nav>
 
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
             <LanguageSwitcher currentLocale={locale} />
-
-            {/* <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className={`p-1.5 rounded-full transition-colors ${
-                scrolled
-                  ? "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200"
-                  : "bg-white/20 text-white dark:bg-gray-800/50"
-              }`}
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-            </button> */}
 
             {/* Mobile menu button */}
             <button
@@ -443,6 +443,19 @@ export default function Header({ locale = "en" }: { locale: string }) {
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.restaurants}
+            </Link>
+
+            {/* Join Us Mobile Page Link */}
+            <Link
+              href={getPageLink('join-us')}
+              className={`block py-2 px-4 mt-3 rounded-full border-2 text-center transition-all duration-300 ${
+                scrolled 
+                  ? "border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-400 dark:hover:text-gray-900" 
+                  : "border-amber-300 text-amber-300 hover:bg-amber-300 hover:text-gray-900"
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              {t.joinUs}
             </Link>
           </nav>
         )}
