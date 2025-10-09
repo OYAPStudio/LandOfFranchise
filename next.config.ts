@@ -2,7 +2,24 @@ import { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['images.unsplash.com', 'cdn-icons-png.flaticon.com', 'images.pexels.com', 'freevectormaps.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn-icons-png.flaticon.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'freevectormaps.com',
+      },
+    ],
   },
 } as NextConfig;  // Use type assertion to override strict typing
 
