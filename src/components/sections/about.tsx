@@ -6,6 +6,13 @@ import { motion } from 'framer-motion';
 import { companyInfo } from '@/lib/mock-data';
 import { Building, Calendar, Award, Target, Compass, Heart, LucideIcon, ChevronDown, ChevronUp } from 'lucide-react';
 
+// Loading skeleton component
+const ImageSkeleton = () => (
+  <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse">
+    <div className="h-full w-full bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer"></div>
+  </div>
+);
+
 const translations = {
   en: {
     about: "About Us",
@@ -58,9 +65,24 @@ interface AboutProps {
 export default function About({ locale = 'en' }: AboutProps) {
   const [isMounted, setIsMounted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   useEffect(() => {
     setIsMounted(true);
+    
+    // Preload critical images
+    const preloadImages = [
+      '/images/restaurants/AWS09315.jpg',
+      '/images/restaurants/restaurant-2.avif'
+    ];
+    
+    preloadImages.forEach((src) => {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+    });
   }, []);
 
   // Use locale prop and ensure it's a valid key
@@ -72,8 +94,15 @@ export default function About({ locale = 'en' }: AboutProps) {
 
   // Use the new long description text
   const fullDescription = companyData.longDescription;
-  // Show only the first paragraph for the truncated version
-  const truncatedDescription = fullDescription.split('\n')[0] + '...';
+  
+  // Function to get first 3 lines of text
+  const getFirstThreeLines = (text: string): string => {
+    const sentences = text.split(/[.!?]+/).filter(sentence => sentence.trim().length > 0);
+    return sentences.slice(0, 3).join('. ') + (sentences.length > 3 ? '...' : '');
+  };
+  
+  // Show only the first 3 lines for the truncated version
+  const truncatedDescription = getFirstThreeLines(fullDescription);
 
   // Animation variants
   const fadeInUp = {
@@ -108,7 +137,10 @@ export default function About({ locale = 'en' }: AboutProps) {
         {/* Left column - Image with fixed size */}
         <div className="w-full md:w-1/2 relative aspect-[4/3] min-h-[300px] md:min-h-0 overflow-hidden">
           {/* Fixed position and size for image container */}
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700">
+            {/* Loading skeleton */}
+            {!imageLoaded && <ImageSkeleton />}
+            
             <motion.div
               initial={{ scale: 1.1 }}
               whileInView={{ scale: 1 }}
@@ -120,10 +152,41 @@ export default function About({ locale = 'en' }: AboutProps) {
                 src="/images/restaurants/AWS09315.jpg"
                 alt="Traditional Iraqi restaurant interior"
                 fill
-                className="object-cover object-center"
+                className={`object-cover object-center transition-opacity duration-500 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
                 priority
+                quality={85}
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R7+h1A4rNvELKvdRWi+6tX93UnMuB1A8/kA1d9uS2r"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                onLoad={() => {
+                  setImageLoaded(true);
+                  
+                  // Preload additional images after main image loads
+                  if (typeof window !== 'undefined') {
+                    const additionalImages = [
+                      '/images/restaurants/restaurant-1.avif',
+                      '/images/hero/hero-background.avif'
+                    ];
+                    
+                    additionalImages.forEach((src) => {
+                      const img = document.createElement('img');
+                      img.src = src;
+                      img.style.display = 'none';
+                      document.body.appendChild(img);
+                      img.onload = () => document.body.removeChild(img);
+                    });
+                  }
+                }}
+                onError={() => {
+                  console.warn('Failed to load about page image');
+                  setImageLoaded(true); // Still hide skeleton on error
+                }}
               />
-              <div className={`absolute inset-0 bg-gradient-to-${currentLocale === 'ar' ? 'l' : 'r'} from-white/70 to-transparent dark:from-gray-900/70`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-${currentLocale === 'ar' ? 'l' : 'r'} from-white/70 to-transparent dark:from-gray-900/70 transition-opacity duration-500 ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}></div>
             </motion.div>
           </div>
           
@@ -197,30 +260,36 @@ export default function About({ locale = 'en' }: AboutProps) {
               
               {/* Our Story section with Read More functionality - Fixed height container */}
               <div className={`${currentLocale === 'ar' ? 'text-right' : 'text-left'}`}>
-                <div className="overflow-y-auto">
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line transition-all duration-300 ease-in-out">
+                <div className="overflow-hidden">
+                  <motion.p 
+                    className="text-gray-700 dark:text-gray-300 whitespace-pre-line transition-all duration-500 ease-in-out"
+                    initial={false}
+                    animate={{ 
+                      height: isExpanded ? 'auto' : 'auto',
+                      opacity: 1 
+                    }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
+                  >
                     {isExpanded ? fullDescription : truncatedDescription}
-                  </p>
+                  </motion.p>
                 </div>
                 
                 <motion.button
                   onClick={toggleExpand}
-                  className={`mt-3 flex items-center text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 font-medium transition-all duration-300 ${
-                    currentLocale === 'ar' ? 'mr-auto' : 'ml-auto'
+                  className={`mt-4 flex items-center text-amber-600 hover:text-amber-700 dark:text-amber-500 dark:hover:text-amber-400 font-medium transition-all duration-300 group ${
+                    currentLocale === 'ar' ? 'mr-auto flex-row-reverse' : 'ml-auto'
                   }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
+                  <span className="relative">
+                    {isExpanded ? t.readLess : t.readMore}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-amber-600 dark:bg-amber-500 transition-all duration-300 group-hover:w-full"></span>
+                  </span>
                   {isExpanded ? (
-                    <>
-                      {t.readLess} 
-                      <ChevronUp className={`w-4 h-4 ${currentLocale === 'ar' ? 'ml-1' : 'ml-1'}`} />
-                    </>
+                    <ChevronUp className={`w-4 h-4 transition-transform duration-300 ${currentLocale === 'ar' ? 'mr-1' : 'ml-1'}`} />
                   ) : (
-                    <>
-                      {t.readMore}
-                      <ChevronDown className={`w-4 h-4 ${currentLocale === 'ar' ? 'ml-1' : 'ml-1'}`} />
-                    </>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${currentLocale === 'ar' ? 'mr-1' : 'ml-1'}`} />
                   )}
                 </motion.button>
               </div>

@@ -9,6 +9,7 @@ const translations = {
   en: {
     about: "About Us",
     restaurants: "Our Restaurants",
+    history: "Our History",
     careers: "Careers",
     press: "Press",
     contact: "Contact Us",
@@ -25,6 +26,7 @@ const translations = {
   ar: {
     about: "عن الشركة",
     restaurants: "مطاعمنا",
+    history: "تاريخنا",
     careers: "وظائف",
     press: "الصحافة",
     contact: "اتصل بنا",
@@ -127,6 +129,11 @@ export default function Footer({ locale: propLocale }: FooterProps = {}) {
               <li>
                 <Link href="#about" className={`${textMutedClass} ${textHoverClass} transition-colors`}>
                   {t.about}
+                </Link>
+              </li>
+              <li>
+                <Link href="#company-history" className={`${textMutedClass} ${textHoverClass} transition-colors`}>
+                  {t.history}
                 </Link>
               </li>
               <li>

@@ -272,6 +272,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
             return (
               <motion.div
                 key={restaurant.id}
+                id={`restaurant-${restaurant.id}`}
                 className="relative"
                 variants={restaurantCardVariants}
                 whileHover="hover"

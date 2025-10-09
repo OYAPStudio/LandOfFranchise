@@ -234,16 +234,44 @@ export default function Header({ locale = "en" }: { locale: string }) {
                     // Get restaurant data based on current locale
                     const restaurantData = restaurant[currentLocale];
                     
+                    const handleRestaurantClick = (e: React.MouseEvent) => {
+                      e.preventDefault();
+                      setBrandsDropdownOpen(false);
+                      
+                      // Scroll to restaurants section first
+                      const restaurantsSection = document.getElementById('restaurants');
+                      if (restaurantsSection) {
+                        restaurantsSection.scrollIntoView({ 
+                          behavior: 'smooth',
+                          block: 'start'
+                        });
+                        
+                        // Then highlight the specific restaurant card after a short delay
+                        setTimeout(() => {
+                          const restaurantCard = document.getElementById(`restaurant-${restaurant.id}`);
+                          if (restaurantCard) {
+                            restaurantCard.scrollIntoView({ 
+                              behavior: 'smooth',
+                              block: 'center'
+                            });
+                            
+                            // Add highlight effect
+                            restaurantCard.classList.add('highlight-restaurant');
+                            setTimeout(() => {
+                              restaurantCard.classList.remove('highlight-restaurant');
+                            }, 3000);
+                          }
+                        }, 500);
+                      }
+                    };
+                    
                     return (
-                      <Link 
+                      <button 
                         key={restaurant.id}
-                        href={`/${locale}/brands/${restaurant.id}`}
-                        className={`group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-gray-700/80 transition-colors duration-200 ${
+                        onClick={handleRestaurantClick}
+                        className={`group flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-amber-50 dark:hover:bg-gray-700/80 transition-colors duration-200 w-full ${
                           isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'
                         } ${index !== restaurants.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
-                        onClick={() => setBrandsDropdownOpen(false)}
-                        target="_blank" 
-                        rel="noopener noreferrer"
                       >
                         <div className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-white dark:border-gray-700 shadow-sm transition-transform duration-200 group-hover:scale-110 ${
                           isRTL ? 'ml-3 mr-0' : 'mr-3 ml-0'
@@ -267,22 +295,14 @@ export default function Header({ locale = "en" }: { locale: string }) {
                         <span className={`text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${
                           isRTL ? 'text-left' : 'text-right'
                         }`}>
-                          {isRTL ? '← زيارة' : 'Visit →'}
+                          {isRTL ? '← عرض' : 'View →'}
                         </span>
-                      </Link>
+                      </button>
                     );
                   })}
                 </div>
               </div>
             </div>
-            
-            <Link href={getLink('#restaurants')} className={`text-sm py-1 transition-colors ${
-              scrolled 
-                ? "text-gray-800 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400" 
-                : "text-white hover:text-amber-300"
-            }`}>
-              {t.restaurants}
-            </Link>
 
             {/* Join Us Page Link */}
             <Link href={getPageLink('join-us')} className={`text-sm py-1 px-3 rounded-full border-2 transition-all duration-300 ${
@@ -394,20 +414,49 @@ export default function Header({ locale = "en" }: { locale: string }) {
                     // Get restaurant data based on current locale
                     const restaurantData = restaurant[currentLocale];
                     
+                    const handleMobileRestaurantClick = (e: React.MouseEvent) => {
+                      e.preventDefault();
+                      setMobileMenuOpen(false);
+                      setBrandsDropdownOpen(false);
+                      
+                      // Scroll to restaurants section first
+                      const restaurantsSection = document.getElementById('restaurants');
+                      if (restaurantsSection) {
+                        restaurantsSection.scrollIntoView({ 
+                          behavior: 'smooth',
+                          block: 'start'
+                        });
+                        
+                        // Then highlight the specific restaurant card after a short delay
+                        setTimeout(() => {
+                          const restaurantCard = document.getElementById(`restaurant-${restaurant.id}`);
+                          if (restaurantCard) {
+                            restaurantCard.scrollIntoView({ 
+                              behavior: 'smooth',
+                              block: 'center'
+                            });
+                            
+                            // Add highlight effect
+                            restaurantCard.classList.add('highlight-restaurant');
+                            setTimeout(() => {
+                              restaurantCard.classList.remove('highlight-restaurant');
+                            }, 3000);
+                          }
+                        }, 500);
+                      }
+                    };
+                    
                     return (
-                      <Link
+                      <button
                         key={restaurant.id}
-                        href={`/${locale}/brands/${restaurant.id}`}
-                        className={`flex items-center py-2 px-2 rounded-md transition-colors duration-200 ${
+                        onClick={handleMobileRestaurantClick}
+                        className={`flex items-center py-2 px-2 rounded-md transition-colors duration-200 w-full ${
                           isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left'
                         } ${
                           scrolled 
                             ? "text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50/50 dark:hover:bg-gray-800/50" 
                             : "text-white/90 hover:text-white hover:bg-white/10"
                         }`}
-                        onClick={() => setMobileMenuOpen(false)}
-                        target="_blank"
-                        rel="noopener noreferrer"
                       >
                         <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border-2 border-white dark:border-gray-700 shadow-sm ${
                           isRTL ? 'ml-3 mr-0' : 'mr-3 ml-0'
@@ -426,24 +475,12 @@ export default function Header({ locale = "en" }: { locale: string }) {
                             {restaurantData.cuisineType}
                           </p>
                         </div>
-                      </Link>
+                      </button>
                     );
                   })}
                 </div>
               </div>
             </div>
-            
-            <Link
-              href={getLink('#restaurants')}
-              className={`block py-1.5 transition-colors ${
-                scrolled 
-                  ? "text-gray-800 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400" 
-                  : "text-white hover:text-amber-300"
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t.restaurants}
-            </Link>
 
             {/* Join Us Mobile Page Link */}
             <Link

@@ -259,7 +259,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
   }, [heroImages.length]);
 
   return (
-    <div className={`w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-500 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div id="company-history" className={`w-full min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 transition-colors duration-500 ${isRTL ? 'rtl' : 'ltr'}`}>
       
       {/* Hero Section - Full Width */}
       <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
