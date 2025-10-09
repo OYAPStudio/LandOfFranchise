@@ -76,7 +76,7 @@
 
   /* RTL support for Arabic */
   html[dir="rtl"] {
-    font-family: var(--font-amiri), sans-serif;
+    font-family: var(--font-arabic), sans-serif;
   }
   
   /* Special styling for headings in Arabic */
@@ -86,7 +86,23 @@
   html[dir="rtl"] h4,
   html[dir="rtl"] h5,
   html[dir="rtl"] h6 {
-    font-family: var(--font-amiri), sans-serif;
+    font-family: var(--font-arabic), sans-serif;
+  }
+
+  /* Arabic font class for components */
+  .font-arabic {
+    font-family: var(--font-arabic), sans-serif !important;
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* RTL layout fixes */
+  .rtl {
+    direction: rtl;
+  }
+
+  .ltr {
+    direction: ltr;
   }
   
   /* Smooth scrolling for anchor links */

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { MapPin, Navigation, Globe, Building, Flag, ChevronRight, Clock, Phone } from 'lucide-react';
+import { MapPin, Navigation, Globe, Building, Flag, ChevronRight, Clock, Phone, X, ChevronLeft } from 'lucide-react';
 
 // Dynamically import map components (client only)
 const Map = dynamic(() => import('react-map-gl/maplibre'), { ssr: false });
@@ -13,6 +13,30 @@ const Marker = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.Mar
 const Popup = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.Popup), { ssr: false });
 const NavigationControl = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.NavigationControl), { ssr: false });
 const FullscreenControl = dynamic(() => import('react-map-gl/maplibre').then(mod => mod.FullscreenControl), { ssr: false });
+
+// RTL Text Plugin for proper Arabic text rendering
+const configureRTL = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const rtlTextPlugin = require('@mapbox/mapbox-gl-rtl-text');
+      const maplibregl = require('maplibre-gl');
+      if (maplibregl.setRTLTextPlugin && !maplibregl.getRTLTextPluginStatus()) {
+        maplibregl.setRTLTextPlugin(
+          'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
+          true
+        );
+      }
+    } catch (error) {
+      console.warn('RTL text plugin not available:', error);
+    }
+  }
+};
+
+// Function to get appropriate map style - always use English labels for consistency
+const getMapStyle = (locale: string): string => {
+  // Use English language parameter for both locales to ensure consistent appearance
+  return "https://api.maptiler.com/maps/basic-v2/style.json?key=mUozmEO28XDI7F1BKx1o&language=en";
+};
 
 // Map translations
 const translations = {
@@ -62,11 +86,13 @@ interface Branch {
   phone: string;
   hours: string;
   coordinates: string;
+  images?: string[];
 }
 
 interface Country {
   id: string;
   name: string;
+  nameAr?: string;
   position: { top: string; right: string };
   scale: number;
   delay: number;
@@ -176,8 +202,13 @@ const parseCoordinates = (coordString: string): [number, number] => {
   return [lng, lat];
 };
 
+// Helper function to generate Google Maps directions URL
+const getDirectionsUrl = (coordinates: string) => {
+  return `https://www.google.com/maps/dir/?api=1&destination=${coordinates}`;
+};
+
 // Custom marker component with animation
-const CustomMarker = ({ country, isActive, onClick }: { country: Country; isActive: boolean; onClick: (country: Country) => void }) => {
+const CustomMarker = ({ country, isActive, onClick, locale }: { country: Country; isActive: boolean; onClick: (country: Country) => void; locale: string }) => {
   return (
     <Marker 
       longitude={country.mapCoordinates[0]}
@@ -208,14 +239,14 @@ const CustomMarker = ({ country, isActive, onClick }: { country: Country; isActi
             <MapPin className="w-5 h-5 text-white" />
           </div>
           <motion.div 
-            className="absolute top-full mt-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md whitespace-nowrap transform -translate-x-1/4 shadow-lg z-20"
+            className={`absolute top-full mt-2 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-md whitespace-nowrap transform -translate-x-1/4 shadow-lg z-20 ${locale === 'ar' ? 'font-arabic' : ''}`}
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: country.delay * 0.1 + 0.2 }}
           >
-            <div className="flex items-center">
-              {country.name}
-              <span className="ml-1 font-normal">({country.locations})</span>
+            <div className={`flex items-center ${locale === 'ar' ? 'flex-row-reverse' : ''}`}>
+              {locale === 'ar' && country.nameAr ? country.nameAr : country.name}
+              <span className={`${locale === 'ar' ? 'mr-1' : 'ml-1'} font-normal`}>({country.locations})</span>
             </div>
           </motion.div>
         </div>
@@ -224,70 +255,203 @@ const CustomMarker = ({ country, isActive, onClick }: { country: Country; isActi
   );
 };
 
-// Branch popup component
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const BranchPopup = ({ branch, country, t, onClose }: { branch: Branch; country: Country; t: TranslationSet; onClose: () => void }) => {
-  function getDirectionsUrl(coordinates: string) {
-    return `https://www.google.com/maps/dir/?api=1&destination=${coordinates}`;
-  }
+// Branch popup component - Clean minimal design with photo slideshow
+const BranchPopup = ({ branch, country, t, onClose, locale }: { branch: Branch; country: Country; t: TranslationSet; onClose: () => void; locale: string }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Default images if none provided
+  const defaultImages = [
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=200&fit=crop',
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop'
+  ];
+  
+  const images = branch.images && branch.images.length > 0 ? branch.images : defaultImages;
+  
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+  
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   return (
     <Popup
       longitude={parseCoordinates(branch.coordinates)[0]}
       latitude={parseCoordinates(branch.coordinates)[1]}
       anchor="bottom"
-      closeButton={true}
+      closeButton={false}
       closeOnClick={false}
       onClose={onClose}
-      className="z-50"
-      offset={25}
+      className="z-40"
+      offset={[0, -10]}
+      maxWidth="none"
     >
-      <div className="p-3 max-w-sm" onClick={(e) => e.stopPropagation()}>
-        <h3 className="text-lg font-bold text-gray-900 mb-2">{branch.name}</h3>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-start">
-            <MapPin className="w-4 h-4 text-amber-500 mt-0.5 mr-2 flex-shrink-0" />
-            <div>
-              <div className="text-gray-500 font-medium">{t.address}</div>
-              <div className="text-gray-700">{branch.address}</div>
-            </div>
-          </div>
+      <motion.div 
+        className="w-56 rounded-lg shadow-lg overflow-hidden bg-white dark:bg-gray-800"
+        initial={{ scale: 0.8, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.8, opacity: 0, y: 20 }}
+        transition={{ 
+          type: "spring", 
+          stiffness: 300, 
+          damping: 30,
+          duration: 0.4 
+        }}
+      >
+        {/* Photo Slideshow */}
+        <div className="relative h-32 overflow-hidden">
+          <motion.img
+            key={currentImageIndex}
+            src={images[currentImageIndex]}
+            alt={`${branch.name} - Image ${currentImageIndex + 1}`}
+            className="w-full h-full object-cover"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          />
           
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 text-amber-500 mr-2 flex-shrink-0" />
-            <div>
-              <div className="text-gray-500 font-medium">{t.openingHours}</div>
-              <div className="text-gray-700">{branch.hours}</div>
-            </div>
-          </div>
+          {/* Image Navigation */}
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={prevImage}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-all"
+              >
+                <ChevronLeft className="w-4 h-4 text-white" />
+              </button>
+              <button
+                onClick={nextImage}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-all"
+              >
+                <ChevronRight className="w-4 h-4 text-white" />
+              </button>
+              
+              {/* Image Dots */}
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentImageIndex(index)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
           
-          <div className="flex items-center">
-            <Phone className="w-4 h-4 text-amber-500 mr-2 flex-shrink-0" />
-            <div>
-              <div className="text-gray-500 font-medium">{t.phone}</div>
-              <div className="text-gray-700">{branch.phone}</div>
-            </div>
-          </div>
+          {/* Close button overlay */}
+          <motion.button
+            onClick={onClose}
+            className="absolute top-2 right-2 p-1 rounded-full bg-black/50 hover:bg-black/70 transition-all duration-200"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            initial={{ opacity: 0, rotate: -90 }}
+            animate={{ opacity: 1, rotate: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <X className="w-3 h-3 text-white" />
+          </motion.button>
         </div>
-        
-        <div className="mt-4">
+
+        {/* Header */}
+        <div className="relative bg-gradient-to-br from-amber-500 via-amber-600 to-orange-600 p-3 text-white">
+          <motion.h3 
+            className={`font-bold text-sm leading-tight ${locale === 'ar' ? 'font-arabic text-right' : ''}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            {branch.name}
+          </motion.h3>
+        </div>
+
+        {/* Content */}
+        <div className="p-3 space-y-2">
+          {/* Address */}
+          <motion.div 
+            className={`flex items-center gap-2 text-xs ${locale === 'ar' ? 'flex-row-reverse' : ''}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <MapPin className="w-3 h-3 text-amber-600 flex-shrink-0" />
+            <span className={`text-gray-700 dark:text-gray-300 truncate ${locale === 'ar' ? 'font-arabic' : ''}`}>
+              {branch.address.length > 30 ? branch.address.substring(0, 30) + '...' : branch.address}
+            </span>
+          </motion.div>
+
+          {/* Hours */}
+          <motion.div 
+            className={`flex items-center gap-2 text-xs ${locale === 'ar' ? 'flex-row-reverse' : ''}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Clock className="w-3 h-3 text-blue-600 flex-shrink-0" />
+            <span className={`text-gray-700 dark:text-gray-300 ${locale === 'ar' ? 'font-arabic' : ''}`}>
+              {branch.hours}
+            </span>
+          </motion.div>
+
+          {/* Phone */}
+          <motion.div 
+            className={`flex items-center gap-2 text-xs ${locale === 'ar' ? 'flex-row-reverse' : ''}`}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Phone className="w-3 h-3 text-green-600 flex-shrink-0" />
+            <a 
+              href={`tel:${branch.phone}`}
+              className={`text-green-600 hover:text-green-700 transition-colors ${locale === 'ar' ? 'font-arabic' : ''}`}
+            >
+              {branch.phone}
+            </a>
+          </motion.div>
+        </div>
+
+        {/* Action Button */}
+        <motion.div 
+          className="p-3 pt-0"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
           <motion.a
             href={getDirectionsUrl(branch.coordinates)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-amber-600 font-medium"
-            whileTap={{ scale: 0.97 }}
+            className={`w-full inline-flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium text-xs rounded-lg transition-all duration-300 ${locale === 'ar' ? 'font-arabic flex-row-reverse' : ''}`}
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <Navigation className="w-4 h-4 mr-1" />
-            {t.getDirections}
+            <Navigation className="w-3 h-3" />
+            <span>{t.getDirections}</span>
           </motion.a>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </Popup>
   );
 };
 
 // Country branch marker component
-const CountryBranchMarkers = ({ country, selectedBranch, onBranchClick }: { country: Country; selectedBranch: Branch | null; onBranchClick: (branch: Branch) => void }) => {
+const CountryBranchMarkers = ({ 
+  country, 
+  selectedBranch, 
+  onBranchClick, 
+  setViewState, 
+  viewState 
+}: { 
+  country: Country; 
+  selectedBranch: Branch | null; 
+  onBranchClick: (branch: Branch) => void;
+  setViewState: (state: any) => void;
+  viewState: any;
+}) => {
   return (
     <>
       {country.branches.map((branch: Branch) => {
@@ -317,6 +481,15 @@ const CountryBranchMarkers = ({ country, selectedBranch, onBranchClick }: { coun
               onClick={(e) => {
                 e.stopPropagation(); // Prevent event from bubbling to the map
                 onBranchClick(branch);
+                // Auto zoom to the clicked restaurant with smooth transition and offset
+                setViewState({
+                  ...viewState,
+                  longitude: lng,
+                  latitude: lat + 0.002, // Offset up so popup is centered
+                  zoom: 15,
+                  pitch: 0,
+                  bearing: 0
+                });
               }}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isSelected ? 'bg-amber-600' : 'bg-amber-500'}`}>
@@ -335,6 +508,8 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       require('maplibre-gl/dist/maplibre-gl.css');
+      // Configure RTL text plugin for Arabic support
+      configureRTL();
     }
   }, []);
 
@@ -346,7 +521,8 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
     {
       id: 'iraq',
       name: 'Iraq',
-      position: { top: '37%', right: '48%' },
+      nameAr: 'العراق',
+      position: { top: '20%', right: '40%' },
       scale: 1.0,
       delay: 0.3,
       status: 'active',
@@ -359,7 +535,12 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: '36.3692944, 43.1416558',
           phone: '+964 123 456 7890',
           hours: '8:00 AM - 11:00 PM',
-          coordinates: '36.3696607,43.1417624'
+          coordinates: '36.3696607,43.1417624',
+          images: [
+            'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=200&fit=crop'
+          ]
         },
         {
           id: 'branch2',
@@ -367,7 +548,12 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: '36.3644714, 43.1464652',
           phone: '+964 123 456 7891',
           hours: '9:00 AM - 10:00 PM',
-          coordinates: '36.3610361,43.145714'
+          coordinates: '36.3610361,43.145714',
+          images: [
+            'https://images.unsplash.com/photo-1592861956120-e524fc739696?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=200&fit=crop'
+          ]
         },
         {
           id: 'branch3',
@@ -375,7 +561,12 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: 'Presidency of the Nineveh Federal Court of Appeal, Mosul',
           phone: '+964 123 456 7892',
           hours: '10:00 AM - 11:00 PM',
-          coordinates: '36.3354188,43.1404843'
+          coordinates: '36.3354188,43.1404843',
+          images: [
+            'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=200&fit=crop'
+          ]
         },
         {
           id: 'branch5',
@@ -383,7 +574,11 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: 'Presidency of the Nineveh Federal Court of Appeal, Mosul',
           phone: '+964 123 456 7892',
           hours: '10:00 AM - 11:00 PM',
-          coordinates: '36.33702,43.142434'
+          coordinates: '36.33702,43.142434',
+          images: [
+            'https://images.unsplash.com/photo-1442975631115-c4f7b05b8a2c?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=200&fit=crop'
+          ]
         },
         {
           id: 'branch4',
@@ -391,7 +586,11 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: '36.3692944, 43.1416558',
           phone: '+964 123 456 7890',
           hours: '8:00 AM - 11:00 PM',
-          coordinates: '36.3874888,43.1593435'
+          coordinates: '36.3874888,43.1593435',
+          images: [
+            'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1551218808-94e220e084d2?w=400&h=200&fit=crop'
+          ]
         },
         {
           id: 'branch6',
@@ -399,10 +598,14 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           address: '36.3692944, 43.1416558',
           phone: '+964 123 456 7890',
           hours: '8:00 AM - 11:00 PM',
-          coordinates: '36.369895,43.142044'
+          coordinates: '36.369895,43.142044',
+          images: [
+            'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=400&h=200&fit=crop',
+            'https://images.unsplash.com/photo-1555074142-20a120cbf8fe?w=400&h=200&fit=crop'
+          ]
         },
       ],
-      mapCoordinates: [44.3661, 33.3152],
+      mapCoordinates: [43.1389, 36.3456], // Mosul
     },
   ];
 
@@ -448,11 +651,12 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
   const handleBranchClick = (branch: Branch) => {
     setSelectedBranch(branch);
     const [lng, lat] = parseCoordinates(branch.coordinates);
+    // Offset the view slightly up so popup appears centered
     setViewState({
       ...viewState,
       longitude: lng,
-      latitude: lat,
-      zoom: 11
+      latitude: lat + 0.002, // Offset up a bit so popup is centered
+      zoom: 15
     });
   };
 
@@ -479,7 +683,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
   };
 
   return (
-    <section id="locations" className="py-24 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+    <section id="locations" className={`py-24 w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-white ${locale === 'ar' ? 'rtl' : 'ltr'}`} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <motion.div
@@ -494,7 +698,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
           </motion.div>
           
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent dark:from-amber-500 dark:to-amber-400"
+            className={`text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-amber-600 to-amber-500 bg-clip-text text-transparent dark:from-amber-500 dark:to-amber-400 ${locale === 'ar' ? 'font-arabic' : ''}`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -503,7 +707,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
             {t.title}
           </motion.h2>
           <motion.p 
-            className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+            className={`text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto ${locale === 'ar' ? 'font-arabic' : ''}`}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -516,13 +720,13 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="w-full lg:w-2/3">
             {isMapVisible ? (
-              <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl">
+              <div className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl z-10">
                 {/* Interactive Map */}
                 <Map
                   {...viewState}
                   onMove={evt => setViewState(evt.viewState)}
-                  mapStyle="https://api.maptiler.com/maps/basic-v2/style.json?key=mUozmEO28XDI7F1BKx1o"
-                  reuseMaps
+                  mapStyle={getMapStyle(locale)}
+                  reuseMaps={false}
                   attributionControl={false}
                   style={{ width: '100%', height: '100%' }}
                   onClick={handleMapClick}
@@ -534,6 +738,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                       country={country}
                       isActive={false}
                       onClick={handleCountryClick}
+                      locale={locale}
                     />
                   ))}
                   
@@ -543,20 +748,21 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                       country={selectedCountry}
                       selectedBranch={selectedBranch}
                       onBranchClick={handleBranchClick}
+                      setViewState={setViewState}
+                      viewState={viewState}
                     />
                   )}
                   
                   {/* Show popup for selected branch */}
                   {selectedBranch && (
                     <BranchPopup 
-                      branch={selectedBranch} 
+                      branch={selectedBranch}
                       country={selectedCountry!}
                       t={t}
                       onClose={() => setSelectedBranch(null)}
+                      locale={locale}
                     />
-                  )}
-                  
-                  {/* Controls */}
+                  )}                  {/* Controls */}
                   <NavigationControl position="top-right" />
                   <FullscreenControl position="top-right" />
                 </Map>
@@ -564,13 +770,13 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                 {/* Back button */}
                 {selectedCountry && (
                   <motion.button
-                    className="absolute top-4 left-4 z-20 flex items-center text-gray-800 bg-white px-3 py-2 rounded-md shadow-md font-medium"
+                    className={`absolute top-4 left-4 z-30 flex items-center text-gray-800 bg-white px-3 py-2 rounded-md shadow-md font-medium ${locale === 'ar' ? 'font-arabic flex-row-reverse' : ''}`}
                     onClick={handleBackClick}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <ChevronRight className="w-5 h-5 mr-1 rotate-180" />
+                    <ChevronRight className={`w-5 h-5 ${locale === 'ar' ? 'ml-1 rotate-0' : 'mr-1 rotate-180'}`} />
                     {t.back}
                   </motion.button>
                 )}
@@ -578,17 +784,17 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                 {/* Map Stats */}
                 {!selectedCountry && (
                   <motion.div 
-                    className="absolute top-4 right-16 bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg"
-                    initial={{ opacity: 0, x: 20 }}
+                    className={`absolute top-4 ${locale === 'ar' ? 'left-16' : 'right-16'} bg-white/90 dark:bg-gray-800/90 p-4 rounded-lg shadow-lg z-30`}
+                    initial={{ opacity: 0, x: locale === 'ar' ? -20 : 20 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.8 }}
                     viewport={{ once: true }}
                   >
-                    <h3 className="font-bold text-amber-600 dark:text-amber-500 mb-2 flex items-center">
-                      <Globe className="w-4 h-4 mr-1" />
+                    <h3 className={`font-bold text-amber-600 dark:text-amber-500 mb-2 flex items-center ${locale === 'ar' ? 'font-arabic' : ''}`}>
+                      <Globe className={`w-4 h-4 ${locale === 'ar' ? 'ml-1' : 'mr-1'}`} />
                       {t.internationalPresence}
                     </h3>
-                    <div className="space-y-2 text-sm">
+                    <div className={`space-y-2 text-sm ${locale === 'ar' ? 'font-arabic' : ''}`}>
                       <div className="flex justify-between">
                         <span className="text-gray-600 dark:text-gray-400">{t.countriesWithPresence}:</span>
                         <span className="font-bold text-gray-900 dark:text-white">{countryData.length}</span>
@@ -693,23 +899,77 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                     {selectedCountry.branches.map((branch, index) => (
                       <motion.div
                         key={branch.id}
-                        className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                        className={`p-4 rounded-lg cursor-pointer transition-all duration-200 border ${
                           selectedBranch?.id === branch.id 
-                            ? 'bg-amber-100 dark:bg-amber-900/30' 
-                            : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600'
+                            ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 shadow-md' 
+                            : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-200 dark:border-gray-600 hover:shadow-sm'
                         }`}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 * index }}
                         onClick={() => {
                           handleBranchClick(branch);
-                          setIsMapVisible(true); // Ensure map is visible when selecting a branch
+                          setIsMapVisible(true);
+                          // Zoom to the specific branch location with offset for popup
+                          const [lng, lat] = parseCoordinates(branch.coordinates);
+                          setViewState({
+                            ...viewState,
+                            longitude: lng,
+                            latitude: lat + 0.002, // Offset up so popup is centered
+                            zoom: 15, // Close zoom level to show the exact location
+                            pitch: 0,
+                            bearing: 0
+                          });
                         }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        <div className="font-bold text-gray-900 dark:text-white mb-1">{branch.name}</div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                          <MapPin className="w-3 h-3 mr-1 text-amber-500" />
-                          {branch.address}
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className={`font-bold text-gray-900 dark:text-white mb-2 ${locale === 'ar' ? 'font-arabic' : ''}`}>
+                              {branch.name}
+                            </div>
+                            
+                            <div className={`space-y-2 text-sm ${locale === 'ar' ? 'font-arabic' : ''}`}>
+                              <div className={`text-gray-600 dark:text-gray-400 flex items-center ${locale === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                <MapPin className={`w-4 h-4 text-amber-500 ${locale === 'ar' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
+                                <span className="line-clamp-2">{branch.address}</span>
+                              </div>
+                              
+                              <div className={`text-gray-600 dark:text-gray-400 flex items-center ${locale === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                <Clock className={`w-4 h-4 text-amber-500 ${locale === 'ar' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
+                                <span>{branch.hours}</span>
+                              </div>
+                              
+                              <div className={`text-gray-600 dark:text-gray-400 flex items-center ${locale === 'ar' ? 'flex-row-reverse' : ''}`}>
+                                <Phone className={`w-4 h-4 text-amber-500 ${locale === 'ar' ? 'ml-2' : 'mr-2'} flex-shrink-0`} />
+                                <span>{branch.phone}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col items-end space-y-2">
+                            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              selectedBranch?.id === branch.id 
+                                ? 'bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-200' 
+                                : 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200'
+                            }`}>
+                              {selectedBranch?.id === branch.id ? 'Selected' : 'Open'}
+                            </div>
+                            
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                window.open(getDirectionsUrl(branch.coordinates), '_blank');
+                              }}
+                              className={`p-2 rounded-full bg-amber-500 hover:bg-amber-600 text-white transition-colors duration-200 ${
+                                locale === 'ar' ? 'rotate-180' : ''
+                              }`}
+                              title={t.getDirections}
+                            >
+                              <Navigation className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </motion.div>
                     ))}
