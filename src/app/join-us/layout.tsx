@@ -1,5 +1,5 @@
-// src/app/[locale]/join-us/layout.tsx
-import '../../globals.css';
+// src/app/join-us/layout.tsx
+import '../globals.css';
 import { Inter, Cairo } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 
@@ -40,19 +40,14 @@ export const metadata = {
   },
 };
 
-export default async function JoinUsLayout({
+export default function JoinUsRootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await params;
-  
   return (
     <html 
-      lang={locale} 
-      dir={locale === 'ar' ? 'rtl' : 'ltr'}
+      lang="en" 
       className={`${inter.variable} ${cairo.variable} overflow-x-hidden`}
       suppressHydrationWarning
     >
@@ -64,7 +59,7 @@ export default async function JoinUsLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* No Header - Full clean layout */}
+          {/* NO HEADER - Completely standalone layout */}
           <div className="min-h-screen font-sans antialiased">
             {children}
           </div>

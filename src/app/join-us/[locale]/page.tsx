@@ -43,7 +43,7 @@ export default async function JoinUsPage({
             {/* Language Switcher */}
             <div className="flex items-center gap-2">
               <Link 
-                href="/en/join-us"
+                href="/join-us/en"
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
                   locale === 'en' 
                     ? 'bg-amber-500 text-white' 
@@ -53,7 +53,7 @@ export default async function JoinUsPage({
                 EN
               </Link>
               <Link 
-                href="/ar/join-us"
+                href="/join-us/ar"
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
                   locale === 'ar' 
                     ? 'bg-amber-500 text-white' 
