@@ -3,7 +3,6 @@ import About from '@/components/sections/about';
 import StatsSection from '@/components/sections/stats';
 import Restaurants from '@/components/sections/restaurants';
 import WorldMap from '@/components/sections/locations';
-import EnhancedCompanyHistory from '@/components/sections/company-history';
 
 export default async function Home({ 
   params 
@@ -18,7 +17,6 @@ export default async function Home({
       <Hero locale={locale} />
       <About locale={locale} />
       <StatsSection locale={locale} />
-      <EnhancedCompanyHistory locale={locale} />
       <WorldMap locale={locale} />
       <Restaurants locale={locale} />
     </main>

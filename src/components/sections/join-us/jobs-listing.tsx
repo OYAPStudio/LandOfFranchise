@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { 
   Briefcase, 
   MapPin, 
-  Clock, 
   Users, 
   Building2,
   Calendar,
@@ -240,7 +239,7 @@ export default function JobsListing({ locale }: JobsListingProps) {
                             <span className={isRTL ? 'font-arabic' : ''}>{job.location}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
+                            <Briefcase className="w-4 h-4" />
                             <span className={isRTL ? 'font-arabic' : ''}>{job.type}</span>
                           </div>
                         </div>
@@ -348,7 +347,7 @@ export default function JobsListing({ locale }: JobsListingProps) {
                         <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
                           <div className="flex items-center gap-3 mb-2">
                             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                              <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                              <Briefcase className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                             </div>
                             <div>
                               <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'font-arabic' : ''}`}>
