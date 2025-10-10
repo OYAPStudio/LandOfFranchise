@@ -4,7 +4,7 @@ export interface RestaurantContent {
   location: string;
   coordinates: [number, number];
   image: string;
-  logo: string;
+  logo: string | null;
   cuisineType: string;
   openingHours: string;
   foundedYear: number;
@@ -165,8 +165,8 @@ export const restaurants: Restaurant[] = [
       description: "Inspired by the ancient hanging gardens, our restaurant offers a unique dining experience with authentic Mesopotamian recipes.",
       location: "Mosul, Iraq",
       coordinates: [36.1911, 44.0091],
-      image: "",
-      logo: "",
+      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2847&auto=format&fit=crop",
+      logo: null,
       cuisineType: "Traditional Iraqi",
       openingHours: "11:00 AM - 11:00 PM",
       foundedYear: 2023,
@@ -177,8 +177,8 @@ export const restaurants: Restaurant[] = [
       description: "مستوحاة من حدائق بابل المعلقة، تقدم مقهى ستارت تجربة مميزة بوصفات مزجت بين الأصالة والابتكار.",
       location: "الموصل، العراق",
       coordinates: [36.1911, 44.0091],
-      image: "",
-      logo: "",
+      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2847&auto=format&fit=crop",
+      logo: null,
       cuisineType: "مطبخ عراقي تقليدي",
       openingHours: "11:00 صباحاً - 11:00 مساءً",
       // employeeCount: 52,

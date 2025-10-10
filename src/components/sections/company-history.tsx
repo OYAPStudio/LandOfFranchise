@@ -208,7 +208,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       },
       icon: Star,
       color: "from-indigo-500 to-purple-600",
-      image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?q=80&w=2781&auto=format&fit=crop",
+      image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2847&auto=format&fit=crop",
       stats: { locations: "TBD", customers: "-", team: "-" }
     }
   ];

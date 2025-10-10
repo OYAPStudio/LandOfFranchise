@@ -395,7 +395,7 @@ export default function JoinUsPage({ locale }: JoinUsPageProps) {
     <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Hero Section - Full Screen */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background */}
+        {/* Enhanced Background */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero/hero-background.avif"
@@ -404,83 +404,135 @@ export default function JoinUsPage({ locale }: JoinUsPageProps) {
             className="object-cover"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50" />
+          {/* Multi-layered overlay for depth */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+          
+          {/* Animated background elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Floating particles/dots */}
+            <div className="absolute top-20 left-20 w-2 h-2 bg-amber-400/30 rounded-full animate-pulse" />
+            <div className="absolute top-40 right-32 w-3 h-3 bg-orange-400/20 rounded-full animate-bounce" style={{ animationDelay: '1s' }} />
+            <div className="absolute bottom-32 left-40 w-1 h-1 bg-amber-300/40 rounded-full animate-ping" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-60 left-1/4 w-2 h-2 bg-yellow-400/25 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+            <div className="absolute bottom-40 right-20 w-1 h-1 bg-amber-500/30 rounded-full animate-bounce" style={{ animationDelay: '1.5s' }} />
+            
+            {/* Geometric shapes */}
+            <div className="absolute top-32 right-20 w-12 h-12 border border-amber-400/20 rotate-45 animate-spin" style={{ animationDuration: '20s' }} />
+            <div className="absolute bottom-20 left-16 w-8 h-8 border border-orange-400/15 rotate-12 animate-pulse" />
+            <div className="absolute top-1/3 right-1/3 w-6 h-6 border border-yellow-400/25 rounded-full animate-ping" style={{ animationDelay: '3s' }} />
+            
+            {/* Gradient orbs */}
+            <div className="absolute top-20 right-40 w-32 h-32 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-full blur-xl animate-pulse" />
+            <div className="absolute bottom-32 left-20 w-40 h-40 bg-gradient-to-r from-yellow-500/8 to-amber-500/8 rounded-full blur-2xl animate-bounce" style={{ animationDuration: '4s' }} />
+            <div className="absolute top-1/2 right-16 w-24 h-24 bg-gradient-to-r from-orange-400/12 to-red-400/8 rounded-full blur-xl animate-ping" style={{ animationDelay: '2s' }} />
+          </div>
+          
+          {/* Subtle grid pattern overlay */}
+          <div 
+            className="absolute inset-0 opacity-5"
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+              backgroundSize: '50px 50px'
+            }}
+          />
+          
+          {/* Top accent border */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500" />
         </div>
 
         {/* Content */}
         <div className="relative z-10 w-full h-full px-4 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center h-full">
-            {/* Left Side - Text Content */}
-            <div className="text-white">
-              <h1 className={`text-4xl lg:text-6xl font-bold mb-6 leading-tight ${
-                isRTL ? 'font-arabic' : ''
-              }`}>
-                {t.title}
-              </h1>
-              <p className={`text-xl lg:text-2xl mb-6 text-amber-300 ${
-                isRTL ? 'font-arabic' : ''
-              }`}>
-                {t.subtitle}
-              </p>
-              <p className={`text-lg mb-8 text-gray-200 ${
-                isRTL ? 'font-arabic' : ''
-              }`}>
-                {t.description}
-              </p>
+            {/* Left Side - Enhanced Text Content */}
+            <div className="text-white relative">
+              {/* Background accent for text */}
+              <div className="absolute -inset-8 bg-gradient-to-r from-black/40 via-black/20 to-transparent rounded-3xl backdrop-blur-sm border border-white/10" />
+              
+              <div className="relative z-10">
+                {/* Title with enhanced styling */}
+                <div className="mb-6">
+                  <div className="inline-block mb-4">
+                    <div className="w-12 h-1 bg-amber-500 mb-2" />
+                    <div className="w-8 h-1 bg-orange-500" />
+                  </div>
+                  <h1 className={`text-4xl lg:text-6xl font-bold mb-4 leading-tight bg-gradient-to-r from-white via-amber-100 to-white bg-clip-text text-transparent ${
+                    isRTL ? 'font-arabic' : ''
+                  }`}>
+                    {t.title}
+                  </h1>
+                  <div className="relative">
+                    <p className={`text-xl lg:text-2xl mb-6 bg-gradient-to-r from-amber-300 via-orange-300 to-yellow-300 bg-clip-text text-transparent font-semibold ${
+                      isRTL ? 'font-arabic' : ''
+                    }`}>
+                      {t.subtitle}
+                    </p>
+                    {/* Subtle glow effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-400/20 to-orange-400/20 blur-lg rounded-lg" />
+                  </div>
+                </div>
+                
+                <p className={`text-lg mb-8 text-gray-200 leading-relaxed ${
+                  isRTL ? 'font-arabic' : ''
+                }`}>
+                  {t.description}
+                </p>
 
-              {/* Stats */}
+              {/* Enhanced Stats */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1">
+                <div className="text-center bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:scale-105 transition-transform duration-300">
+                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1 drop-shadow-lg">
                     {t.stats.restaurants}
                   </div>
-                  <div className={`text-xs text-gray-300 ${isRTL ? 'font-arabic' : ''}`}>
+                  <div className={`text-xs text-gray-200 font-medium ${isRTL ? 'font-arabic' : ''}`}>
                     {t.statLabels.restaurants}
                   </div>
                 </div>
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1">
+                <div className="text-center bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:scale-105 transition-transform duration-300">
+                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1 drop-shadow-lg">
                     {t.stats.employees}
                   </div>
-                  <div className={`text-xs text-gray-300 ${isRTL ? 'font-arabic' : ''}`}>
+                  <div className={`text-xs text-gray-200 font-medium ${isRTL ? 'font-arabic' : ''}`}>
                     {t.statLabels.employees}
                   </div>
                 </div>
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1">
+                <div className="text-center bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:scale-105 transition-transform duration-300">
+                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1 drop-shadow-lg">
                     {t.stats.years}
                   </div>
-                  <div className={`text-xs text-gray-300 ${isRTL ? 'font-arabic' : ''}`}>
+                  <div className={`text-xs text-gray-200 font-medium ${isRTL ? 'font-arabic' : ''}`}>
                     {t.statLabels.years}
                   </div>
                 </div>
-                <div className="text-center bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1">
+                <div className="text-center bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:scale-105 transition-transform duration-300">
+                  <div className="text-2xl lg:text-3xl font-bold text-amber-400 mb-1 drop-shadow-lg">
                     {t.stats.customers}
                   </div>
-                  <div className={`text-xs text-gray-300 ${isRTL ? 'font-arabic' : ''}`}>
+                  <div className={`text-xs text-gray-200 font-medium ${isRTL ? 'font-arabic' : ''}`}>
                     {t.statLabels.customers}
                   </div>
                 </div>
               </div>
 
-              {/* Benefits */}
+              {/* Enhanced Benefits */}
               <div className="space-y-4">
                 {t.benefits.map((benefit, index) => (
-                  <div key={index} className={`flex items-center bg-white/10 backdrop-blur-sm rounded-lg p-4 ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
-                    <div className={`text-amber-400 ${isRTL ? 'ml-4' : 'mr-4'}`}>
+                  <div key={index} className={`flex items-center bg-gradient-to-r from-white/15 via-white/10 to-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:bg-white/20 transition-all duration-300 hover:scale-[1.02] ${isRTL ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`text-amber-400 bg-amber-400/10 rounded-lg p-2 ${isRTL ? 'ml-4' : 'mr-4'}`}>
                       {getIcon(benefit.icon)}
                     </div>
                     <div>
-                      <h3 className={`font-semibold mb-1 ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      <h3 className={`font-semibold mb-1 text-white drop-shadow-sm ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
                         {benefit.title}
                       </h3>
-                      <p className={`text-gray-300 text-sm ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
+                      <p className={`text-gray-200 text-sm leading-relaxed ${isRTL ? 'font-arabic text-right' : 'text-left'}`}>
                         {benefit.description}
                       </p>
                     </div>
                   </div>
                 ))}
+              </div>
               </div>
             </div>
 

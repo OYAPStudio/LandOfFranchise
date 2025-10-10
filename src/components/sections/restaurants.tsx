@@ -287,7 +287,7 @@ export default function Restaurants({ locale = 'en' }: RestaurantsProps) {
                 >
                   <div className="w-32 h-32 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 dark:from-amber-500 dark:to-amber-700 shadow-lg shadow-amber-200 dark:shadow-amber-900/20 flex items-center justify-center p-1 border-2 border-white dark:border-gray-800">
                     <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-800 flex items-center justify-center">
-                      {restaurantData.logo ? (
+                      {restaurantData.logo && restaurantData.logo.trim() ? (
                         // Display the logo if available
                         <Image 
                           src={restaurantData.logo} 

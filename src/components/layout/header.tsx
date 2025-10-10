@@ -298,7 +298,7 @@ export default function Header({ locale = "en" }: { locale: string }) {
             </div>
 
             {/* Join Us Page Link */}
-            <Link href={getPageLink('join-us')} className={`text-sm py-1 px-3 rounded-full border-2 transition-all duration-300 ${
+            <Link href={`/join-us/${locale}`} className={`text-sm py-1 px-3 rounded-full border-2 transition-all duration-300 ${
               scrolled 
                 ? "border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-400 dark:hover:text-gray-900" 
                 : "border-amber-300 text-amber-300 hover:bg-amber-300 hover:text-gray-900"
@@ -465,7 +465,7 @@ export default function Header({ locale = "en" }: { locale: string }) {
 
             {/* Join Us Mobile Page Link */}
             <Link
-              href={getPageLink('join-us')}
+              href={`/join-us/${locale}`}
               className={`block py-2 px-4 mt-3 rounded-full border-2 text-center transition-all duration-300 ${
                 scrolled 
                   ? "border-amber-600 text-amber-600 hover:bg-amber-600 hover:text-white dark:border-amber-400 dark:text-amber-400 dark:hover:bg-amber-400 dark:hover:text-gray-900" 
