@@ -157,6 +157,7 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   const [slideDirection, setSlideDirection] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState<Set<string>>(new Set());
   const slideInterval = useRef<NodeJS.Timeout | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const isAutoplayEnabled = useRef(true);
@@ -184,7 +185,7 @@ export default function Hero({ locale = 'en' }: HeroProps) {
     if (slideInterval.current) {
       clearInterval(slideInterval.current);
     }
-    const delay = isManualChange ? 8000 : 5000;
+    const delay = isManualChange ? 7000 : 6000; // Slightly longer for smoother experience
     slideInterval.current = setInterval(() => {
       if (!isAnimating && isAutoplayEnabled.current) {
         goToNextSlide(false);
@@ -194,7 +195,29 @@ export default function Hero({ locale = 'en' }: HeroProps) {
 
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    
+    // Preload all slideshow images
+    const preloadImages = async () => {
+      const imagePromises = slides
+        .filter(slide => slide.type === 'image')
+        .map(slide => {
+          return new Promise<string>((resolve) => {
+            const img = new window.Image();
+            img.onload = () => {
+              setImagesLoaded(prev => new Set(prev).add(slide.src));
+              resolve(slide.src);
+            };
+            img.onerror = () => resolve(slide.src); // Still resolve to not block
+            img.src = slide.src;
+          });
+        });
+      
+      // Wait for all images to load
+      await Promise.all(imagePromises);
+    };
+    
+    preloadImages();
+  }, [slides]);
 
   useEffect(() => {
     if (currentSlide !== prevSlide) {
@@ -314,7 +337,10 @@ export default function Hero({ locale = 'en' }: HeroProps) {
   };
 
   const handleAnimationComplete = () => {
-    setIsAnimating(false);
+    // Use a shorter timeout to make transitions feel snappier
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 100);
   };
 
   if (!isMounted) {
@@ -349,20 +375,20 @@ export default function Hero({ locale = 'en' }: HeroProps) {
           transition={{
             x: { 
               type: "tween", 
-              duration: 0.8,
-              ease: [0.16, 1, 0.3, 1]
+              duration: 1.0,
+              ease: [0.25, 0.1, 0.25, 1]
             },
             opacity: { 
-              duration: 0.7,
-              ease: "easeOut"
+              duration: 0.9,
+              ease: [0.25, 0.1, 0.25, 1]
             },
             scale: {
-              duration: 0.9,
-              ease: [0.34, 1.56, 0.64, 1]
+              duration: 1.2,
+              ease: [0.16, 1, 0.3, 1]
             },
             filter: {
-              duration: 0.8,
-              ease: "easeOut"
+              duration: 0.7,
+              ease: [0.25, 0.1, 0.25, 1]
             }
           }}
           onAnimationComplete={handleAnimationComplete}
@@ -371,14 +397,21 @@ export default function Hero({ locale = 'en' }: HeroProps) {
           {currentContent.type === 'image' ? (
             <>
               <div className="absolute inset-0 overflow-hidden">
+                {/* Loading placeholder */}
+                {!imagesLoaded.has(currentContent.src) && (
+                  <div className="absolute inset-0 bg-gray-800 animate-pulse" />
+                )}
                 <Image
                   src={currentContent.src}
                   alt={currentContent.alt}
                   fill
-                  className="object-cover transform scale-[1.01]"
-                  quality={90}
-                  priority
+                  className={`object-cover transform scale-[1.01] transition-opacity duration-500 ${
+                    imagesLoaded.has(currentContent.src) ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  quality={95}
+                  priority={currentSlide === 0}
                   sizes="100vw"
+                  onLoad={() => setImagesLoaded(prev => new Set(prev).add(currentContent.src))}
                 />
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/70 z-10"></div>
@@ -502,34 +535,29 @@ export default function Hero({ locale = 'en' }: HeroProps) {
               {/* {currentContent.subtitle} */}
             </motion.p>
             
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -10, opacity: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-              className={`flex items-center mb-8 ${
-                isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'
-              }`}
-            >
-              <div className="w-16 h-1 bg-amber-500"></div>
-              <p className="text-amber-300 font-medium">
-                {new Date().getFullYear() - companyData.foundedYear} {t.years}
-              </p>
-            </motion.div>
-            
-            <motion.button
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -10, opacity: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-              className="bg-amber-500 hover:bg-amber-600 text-white py-3 px-8 rounded-full text-lg font-medium transition-all duration-300 shadow-lg hover:shadow-amber-500/20 hover:translate-y-[-2px]"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              {t.cta}
-            </motion.button>
+            {/* Removed the years and CTA button as requested */}
           </motion.div>
         </AnimatePresence>
+      </div>
+      
+      {/* Preload next images invisibly */}
+      <div className="hidden">
+        {slides.map((slide, index) => {
+          if (slide.type === 'image' && index !== currentSlide) {
+            return (
+              <Image
+                key={slide.id}
+                src={slide.src}
+                alt={slide.alt}
+                width={1}
+                height={1}
+                priority={index === (currentSlide + 1) % slides.length}
+                onLoad={() => setImagesLoaded(prev => new Set(prev).add(slide.src))}
+              />
+            );
+          }
+          return null;
+        })}
       </div>
     </section>
   );

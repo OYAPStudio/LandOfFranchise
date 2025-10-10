@@ -13,7 +13,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react';
-import JobApplicationModal from './job-application-modal';
+import type { JobPosition } from '@/lib/odoo';
 
 // Define the Job interface that matches our JSON-2 API response
 interface Job {
@@ -78,8 +78,6 @@ export default function JobsListing({ locale }: JobsListingProps) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchJobs();
@@ -90,9 +88,7 @@ export default function JobsListing({ locale }: JobsListingProps) {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/jobs', {
-        cache: 'no-store' // Ensure fresh data
-      });
+      const response = await fetch('/api/jobs');
       const result = await response.json();
       
       if (result.success) {
@@ -106,16 +102,6 @@ export default function JobsListing({ locale }: JobsListingProps) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleApplyClick = (job: Job) => {
-    setSelectedJob(job);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedJob(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -133,19 +119,11 @@ export default function JobsListing({ locale }: JobsListingProps) {
     return (
       <section className={`py-24 bg-white dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
         <div className="container mx-auto px-4">
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"></div>
-              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-l-orange-500 rounded-full animate-spin" style={{ animationDelay: '0.3s' }}></div>
-            </div>
-            <p className={`mt-6 text-lg font-medium text-gray-600 dark:text-gray-400 ${isRTL ? 'font-arabic' : ''}`}>
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 mx-auto mb-4 text-amber-500 animate-spin" />
+            <p className={`text-lg text-gray-600 dark:text-gray-400 ${isRTL ? 'font-arabic' : ''}`}>
               {t.loading}
             </p>
-            <div className="mt-4 flex space-x-1">
-              <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-orange-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-            </div>
           </div>
         </div>
       </section>
@@ -218,169 +196,90 @@ export default function JobsListing({ locale }: JobsListingProps) {
             </p>
           </div>
         ) : (
-          <div className="space-y-8 max-w-6xl mx-auto">
+          <div className="grid gap-6 max-w-4xl mx-auto">
             {jobs.map((job, index) => (
               <motion.div
                 key={job.id}
                 initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-500 overflow-hidden group border border-gray-100 dark:border-gray-700"
+                viewport={{ once: true }}
+                className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 group"
               >
-                {/* Job Header */}
-                <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-6">
-                  <div className="flex items-start justify-between">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  {/* Job Info */}
+                  <div className="flex-1">
                     <div className="flex items-start gap-4">
-                      <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                        <Briefcase className="w-8 h-8 text-white" />
+                      <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Briefcase className="w-6 h-6 text-white" />
                       </div>
-                      <div>
-                        <h3 className={`text-2xl font-bold text-white mb-2 ${isRTL ? 'font-arabic' : ''}`}>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`text-xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-300 ${isRTL ? 'font-arabic' : ''}`}>
                           {job.title}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-4 text-white/90">
-                          <div className="flex items-center gap-2">
+                        
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                          <div className="flex items-center gap-1">
                             <Building2 className="w-4 h-4" />
-                            <span className={isRTL ? 'font-arabic' : ''}>{job.department}</span>
+                            <span className={isRTL ? 'font-arabic' : ''}>
+                              {job.department}
+                            </span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          
+                          <div className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
                             <span className={isRTL ? 'font-arabic' : ''}>{job.location}</span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          
+                          <div className="flex items-center gap-1">
                             <Clock className="w-4 h-4" />
                             <span className={isRTL ? 'font-arabic' : ''}>{job.type}</span>
                           </div>
+                          
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            <span className={isRTL ? 'font-arabic' : ''}>
+                              {t.posted} {formatDate(job.postedDate)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="flex items-center gap-2 text-white/80 text-sm mb-2">
-                        <Calendar className="w-4 h-4" />
-                        <span className={isRTL ? 'font-arabic' : ''}>
-                          {t.posted} {formatDate(job.postedDate)}
-                        </span>
-                      </div>
-                      <button 
-                        onClick={() => handleApplyClick(job)}
-                        className="px-6 py-3 bg-white text-amber-600 font-bold rounded-xl hover:bg-gray-100 transition-all duration-300 flex items-center gap-2 group-hover:scale-105"
-                      >
-                        <span className={isRTL ? 'font-arabic' : ''}>{t.apply}</span>
-                        <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Job Content */}
-                <div className="p-8">
-                  <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Job Description */}
-                    <div className="lg:col-span-2 space-y-6">
-                      <div>
-                        <h4 className={`text-lg font-semibold text-gray-900 dark:text-white mb-3 ${isRTL ? 'font-arabic' : ''}`}>
-                          {isRTL ? 'وصف الوظيفة' : 'Job Description'}
-                        </h4>
-                        {job.description ? (
-                          <div 
-                            className={`text-gray-600 dark:text-gray-300 leading-relaxed ${isRTL ? 'font-arabic' : ''}`}
-                            dangerouslySetInnerHTML={{ 
-                              __html: job.description.length > 300 
-                                ? job.description.substring(0, 300) + '...' 
-                                : job.description 
-                            }}
-                          />
-                        ) : (
-                          <p className={`text-gray-500 dark:text-gray-400 italic ${isRTL ? 'font-arabic' : ''}`}>
-                            {isRTL ? 'لا يوجد وصف متاح' : 'No description available'}
+                        {job.description && (
+                          <p className={`mt-3 text-gray-600 dark:text-gray-400 line-clamp-2 ${isRTL ? 'font-arabic' : ''}`}>
+                            {job.description.replace(/<[^>]*>/g, '').substring(0, 150)}...
                           </p>
                         )}
-                      </div>
 
-                      {/* Requirements */}
-                      {job.requirements && job.requirements.length > 0 && (
-                        <div>
-                          <h4 className={`text-lg font-semibold text-gray-900 dark:text-white mb-3 ${isRTL ? 'font-arabic' : ''}`}>
-                            {isRTL ? 'المتطلبات' : 'Requirements'}
-                          </h4>
-                          <div className="flex flex-wrap gap-2">
-                            {job.requirements.map((req, idx) => (
-                              <span 
-                                key={idx}
-                                className="px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-sm font-medium rounded-full border border-amber-200 dark:border-amber-800"
-                              >
-                                {req}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Job Stats/Info */}
-                    <div className="space-y-6">
-                      {/* Quick Info Cards */}
-                      <div className="space-y-4">
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                              <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                              <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'font-arabic' : ''}`}>
-                                {t.department}
-                              </p>
-                              <p className={`font-semibold text-gray-900 dark:text-white ${isRTL ? 'font-arabic' : ''}`}>
-                                {job.department}
-                              </p>
+                        {job.requirements && job.requirements.length > 0 && (
+                          <div className={`mt-3 ${isRTL ? 'font-arabic' : ''}`}>
+                            <div className="flex flex-wrap gap-2">
+                              {job.requirements.slice(0, 3).map((req, idx) => (
+                                <span 
+                                  key={idx}
+                                  className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs rounded-full"
+                                >
+                                  {req}
+                                </span>
+                              ))}
+                              {job.requirements.length > 3 && (
+                                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs rounded-full">
+                                  +{job.requirements.length - 3} more
+                                </span>
+                              )}
                             </div>
                           </div>
-                        </div>
-
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                              <MapPin className="w-5 h-5 text-green-600 dark:text-green-400" />
-                            </div>
-                            <div>
-                              <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'font-arabic' : ''}`}>
-                                {t.location}
-                              </p>
-                              <p className={`font-semibold text-gray-900 dark:text-white ${isRTL ? 'font-arabic' : ''}`}>
-                                {job.location}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-4">
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                              <Clock className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div>
-                              <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'font-arabic' : ''}`}>
-                                {isRTL ? 'نوع العمل' : 'Employment Type'}
-                              </p>
-                              <p className={`font-semibold text-gray-900 dark:text-white ${isRTL ? 'font-arabic' : ''}`}>
-                                {job.type}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Apply Button (Mobile) */}
-                      <div className="lg:hidden">
-                        <button 
-                          onClick={() => handleApplyClick(job)}
-                          className="w-full px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-2"
-                        >
-                          <span className={isRTL ? 'font-arabic' : ''}>{t.apply}</span>
-                          <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
-                        </button>
+                        )}
                       </div>
                     </div>
+                  </div>
+
+                  {/* Apply Button */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-lg hover:from-amber-600 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-2 group-hover:scale-105">
+                      <span className={isRTL ? 'font-arabic' : ''}>{t.apply}</span>
+                      <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+                    </button>
                   </div>
                 </div>
               </motion.div>
@@ -405,14 +304,6 @@ export default function JobsListing({ locale }: JobsListingProps) {
             </div>
           </motion.div>
         )}
-
-        {/* Application Modal */}
-        <JobApplicationModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          job={selectedJob}
-          locale={locale}
-        />
       </div>
     </section>
   );

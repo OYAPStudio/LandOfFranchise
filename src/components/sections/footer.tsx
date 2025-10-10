@@ -185,30 +185,6 @@ export default function Footer({ locale: propLocale }: FooterProps = {}) {
               </li>
             </ul>
           </div>
-          
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-xl font-bold mb-6">{t.newsletter}</h3>
-            <form className="space-y-4">
-              <div>
-                <input
-                  type="email"
-                  placeholder={t.emailPlaceholder}
-                  className={`w-full px-4 py-2 ${inputBgClass} border ${inputBorderClass} rounded-md ${inputTextClass} focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors duration-300 ${
-                    isRTL ? 'text-right' : 'text-left'
-                  }`}
-                  dir={isRTL ? 'rtl' : 'ltr'}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-4 rounded transition-colors duration-300"
-              >
-                {t.subscribe}
-              </button>
-            </form>
-          </div>
         </div>
         
         <div className={`border-t ${dividerClass} mt-12 pt-8 flex flex-col md:flex-row justify-between items-center ${

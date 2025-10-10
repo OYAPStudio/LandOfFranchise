@@ -192,13 +192,6 @@ export default function Header({ locale = "en" }: { locale: string }) {
             }`}>
               {t.history}
             </Link>
-            <Link href={getLink('#locations')} className={`text-sm py-1 transition-colors ${
-              scrolled 
-                ? "text-gray-800 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400" 
-                : "text-white hover:text-amber-300"
-            }`}>
-              {t.locations}
-            </Link>
             
             {/* Brands Dropdown */}
             <div className="relative brands-dropdown-container">
@@ -356,18 +349,6 @@ export default function Header({ locale = "en" }: { locale: string }) {
               onClick={() => setMobileMenuOpen(false)}
             >
               {t.about}
-            </Link>
-            
-            <Link
-              href={getLink('#locations')}
-              className={`block py-1.5 transition-colors ${
-                scrolled 
-                  ? "text-gray-800 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400" 
-                  : "text-white hover:text-amber-300"
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              {t.locations}
             </Link>
             
             <Link

@@ -77,7 +77,7 @@ const CompanyHistory = ({ locale = 'en' }: CompanyHistoryProps) => {
       icon: Utensils,
       color: "from-red-500 to-orange-600",
       image: "/images/restaurants/AWS1.jpg",
-      stats: { locations: 1, customers: "100+", team: 5 }
+      stats: { locations: 1, customers: "1350+", team: 50 }
     },
     {
       year: 2021,
