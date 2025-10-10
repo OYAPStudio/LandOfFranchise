@@ -22,6 +22,7 @@ interface JobPosition {
 
 interface OdooResponse {
   success: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data?: any;
   error?: string;
 }
@@ -102,6 +103,7 @@ class OdooService {
   }
 
   // Make authenticated calls to Odoo
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async call(model: string, method: string, args: any[] = [], kwargs: any = {}): Promise<OdooResponse> {
     try {
       if (!this.uid) {

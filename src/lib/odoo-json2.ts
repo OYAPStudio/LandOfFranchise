@@ -10,7 +10,33 @@ interface Job {
   postedDate: string;
 }
 
-export class OdooJson2Service {
+export // Types for Odoo API responses
+interface OdooFieldInfo {
+  string: string;
+  type: string;
+  required: boolean;
+  help?: string;
+}
+
+interface OdooFieldsResponse {
+  [fieldName: string]: OdooFieldInfo;
+}
+
+interface OdooJobRecord {
+  id: number;
+  name: string;
+  description?: string;
+  department_id?: [number, string];
+  company_id?: [number, string];
+  address_id?: [number, string];
+  contract_type_id?: [number, string];
+  requirements?: string;
+  create_date?: string;
+  is_published?: boolean;
+  state?: string;
+}
+
+class OdooJson2Service {
   private baseUrl: string;
   private db: string;
   private apiKey: string;
@@ -21,7 +47,7 @@ export class OdooJson2Service {
     this.apiKey = process.env.ODOO_API_KEY || '';
   }
 
-  private async makeRequest(model: string, method: string, body: any): Promise<any> {
+  private async makeRequest(model: string, method: string, body: Record<string, unknown>): Promise<unknown> {
     const url = `${this.baseUrl}/json/2/${model}/${method}`;
     
     console.log('Making JSON-2 API request:', { url, model, method });
@@ -66,7 +92,7 @@ export class OdooJson2Service {
       console.log('Raw job data from Odoo JSON-2:', jobs);
 
       if (Array.isArray(jobs)) {
-        return jobs.map((job: any, index: number) => ({
+        return jobs.map((job: OdooJobRecord, index: number) => ({
           id: job.id || index + 1,
           title: job.name || 'Untitled Position',
           department: job.department_id ? job.department_id[1] : 'General',
@@ -85,13 +111,13 @@ export class OdooJson2Service {
     }
   }
 
-  async getApplicantFields(): Promise<any> {
+  async getApplicantFields(): Promise<OdooFieldsResponse> {
     try {
       console.log('Checking hr.applicant fields...');
       const fieldsInfo = await this.makeRequest('hr.applicant', 'fields_get', {
         context: { lang: 'en_US' },
         attributes: ['string', 'type', 'required', 'help']
-      });
+      }) as OdooFieldsResponse;
       
       console.log('Available hr.applicant fields:', Object.keys(fieldsInfo));
       return fieldsInfo;
@@ -109,7 +135,7 @@ export class OdooJson2Service {
     coverLetter?: string;
     experience?: string;
     cv?: string; // Base64 encoded CV file
-  }): Promise<{ success: boolean; data?: any; error?: string }> {
+  }): Promise<{ success: boolean; data?: OdooJobRecord; error?: string }> {
     try {
       console.log('Creating job application:', applicationData);
       
@@ -140,7 +166,7 @@ export class OdooJson2Service {
       
       return {
         success: true,
-        data: result
+        data: result as OdooJobRecord
       };
     } catch (error) {
       console.error('Failed to create job application:', error);
@@ -151,7 +177,7 @@ export class OdooJson2Service {
     }
   }
 
-  async testConnection(): Promise<{ success: boolean; error?: string; data?: any }> {
+  async testConnection(): Promise<{ success: boolean; error?: string; data?: { message: string; result: unknown } }> {
     try {
       console.log('Testing JSON-2 API connection...');
       

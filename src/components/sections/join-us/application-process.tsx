@@ -10,9 +10,7 @@ import {
   CheckCircle, 
   ArrowRight,
   Phone,
-  Calendar,
-  Clock,
-  MapPin
+  Clock
 } from 'lucide-react';
 
 interface ApplicationProcessProps {

@@ -5,14 +5,12 @@ import { motion } from 'framer-motion';
 import { 
   Briefcase, 
   MapPin, 
-  Users, 
   Building2,
   Calendar,
   ArrowRight,
   Loader2,
   AlertCircle
 } from 'lucide-react';
-import type { JobPosition } from '@/lib/odoo';
 import JobApplicationModal from './job-application-modal';
 
 // Define the Job interface that matches our JSON-2 API response

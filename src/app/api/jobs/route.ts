@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { odooJson2Service } from '@/lib/odoo-json2';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     console.log('Jobs API endpoint called - using JSON-2 API');
     

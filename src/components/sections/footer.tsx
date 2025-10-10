@@ -95,9 +95,6 @@ export default function Footer({ locale: propLocale }: FooterProps = {}) {
   const textClass = isDark ? "text-white" : "text-gray-800";
   const textMutedClass = isDark ? "text-gray-400" : "text-gray-600";
   const textHoverClass = "hover:text-amber-600";
-  const inputBgClass = isDark ? "bg-gray-800" : "bg-white";
-  const inputBorderClass = isDark ? "border-gray-700" : "border-gray-300";
-  const inputTextClass = isDark ? "text-gray-300" : "text-gray-700";
   const dividerClass = isDark ? "border-gray-800" : "border-gray-200";
   const iconClass = "text-amber-500";
 

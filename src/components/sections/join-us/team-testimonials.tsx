@@ -244,7 +244,7 @@ export default function TeamTestimonials({ locale }: TeamTestimonialsProps) {
 
                   {/* Quote Text */}
                   <blockquote className={`text-xl md:text-2xl text-gray-700 dark:text-gray-300 text-center mb-8 leading-relaxed ${isRTL ? 'font-arabic' : ''}`}>
-                    "{currentTestimonial.quote}"
+                    &ldquo;{currentTestimonial.quote}&rdquo;
                   </blockquote>
 
                   {/* Employee Info */}

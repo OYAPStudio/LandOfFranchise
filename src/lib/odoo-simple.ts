@@ -50,6 +50,7 @@ export class SimpleOdooService {
         this.username,
         this.password,
         {}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ], (error: any, value: any) => {
         if (error) {
           console.error('Authentication error details:', {
@@ -74,6 +75,7 @@ export class SimpleOdooService {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async executeKw(model: string, method: string, args: any[] = [], kwargs: any = {}): Promise<any> {
     const uid = await this.authenticate();
 
@@ -98,6 +100,7 @@ export class SimpleOdooService {
         method,
         args,
         kwargs
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ], (error: any, value: any) => {
         if (error) {
           console.error('Execute error:', error);
@@ -122,6 +125,7 @@ export class SimpleOdooService {
       console.log('Raw job data from Odoo:', jobs);
 
       if (Array.isArray(jobs)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return jobs.map((job: any, index: number) => ({
           id: job.id || index + 1,
           title: job.name || 'Untitled Position',
@@ -142,6 +146,7 @@ export class SimpleOdooService {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async testConnection(): Promise<{ success: boolean; error?: string; data?: any }> {
     try {
       console.log('Testing Odoo authentication...');

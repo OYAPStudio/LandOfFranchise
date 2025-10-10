@@ -18,7 +18,7 @@ const FullscreenControl = dynamic(() => import('react-map-gl/maplibre').then(mod
 const configureRTL = () => {
   if (typeof window !== 'undefined') {
     try {
-      const rtlTextPlugin = require('@mapbox/mapbox-gl-rtl-text');
+      require('@mapbox/mapbox-gl-rtl-text');
       const maplibregl = require('maplibre-gl');
       if (maplibregl.setRTLTextPlugin && !maplibregl.getRTLTextPluginStatus()) {
         maplibregl.setRTLTextPlugin(
@@ -33,7 +33,7 @@ const configureRTL = () => {
 };
 
 // Function to get appropriate map style - always use English labels for consistency
-const getMapStyle = (locale: string): string => {
+const getMapStyle = (): string => {
   // Use English language parameter for both locales to ensure consistent appearance
   return "https://api.maptiler.com/maps/basic-v2/style.json?key=mUozmEO28XDI7F1BKx1o&language=en";
 };
@@ -256,7 +256,7 @@ const CustomMarker = ({ country, isActive, onClick, locale }: { country: Country
 };
 
 // Branch popup component - Clean minimal design with photo slideshow
-const BranchPopup = ({ branch, country, t, onClose, locale }: { branch: Branch; country: Country; t: TranslationSet; onClose: () => void; locale: string }) => {
+const BranchPopup = ({ branch, t, onClose, locale }: { branch: Branch; country: Country; t: TranslationSet; onClose: () => void; locale: string }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   // Default images if none provided
@@ -449,8 +449,8 @@ const CountryBranchMarkers = ({
   country: Country; 
   selectedBranch: Branch | null; 
   onBranchClick: (branch: Branch) => void;
-  setViewState: (state: any) => void;
-  viewState: any;
+  setViewState: (state: { longitude: number; latitude: number; zoom: number; bearing: number; pitch: number }) => void;
+  viewState: { longitude: number; latitude: number; zoom: number; bearing: number; pitch: number };
 }) => {
   return (
     <>
@@ -725,7 +725,7 @@ export default function CleanMapLocations({ locale = 'en' }: WorldMapProps) {
                 <Map
                   {...viewState}
                   onMove={evt => setViewState(evt.viewState)}
-                  mapStyle={getMapStyle(locale)}
+                  mapStyle={getMapStyle()}
                   reuseMaps={false}
                   attributionControl={false}
                   style={{ width: '100%', height: '100%' }}

@@ -98,7 +98,6 @@ export default function Header({ locale = "en" }: { locale: string }) {
 
   // Ensure links include the locale prefix
   const getLink = (hash: string) => `/${locale}${hash}`;
-  const getPageLink = (page: string) => `/${locale}/${page}`;
 
   // Prevent hydration issues by not rendering theme-dependent content until mounted
   if (!isMounted) {
@@ -269,13 +268,21 @@ export default function Header({ locale = "en" }: { locale: string }) {
                         <div className={`w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border-2 border-white dark:border-gray-700 shadow-sm transition-transform duration-200 group-hover:scale-110 ${
                           isRTL ? 'ml-3 mr-0' : 'mr-3 ml-0'
                         }`}>
-                          <Image 
-                            src={restaurantData.logo} 
-                            alt={restaurantData.name}
-                            width={40}
-                            height={40}
-                            className="object-cover"
-                          />
+                          {restaurantData.logo ? (
+                            <Image 
+                              src={restaurantData.logo} 
+                              alt={restaurantData.name}
+                              width={40}
+                              height={40}
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">
+                                {restaurantData.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1">
                           <p className="font-medium group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors duration-200">
@@ -442,13 +449,21 @@ export default function Header({ locale = "en" }: { locale: string }) {
                         <div className={`w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border-2 border-white dark:border-gray-700 shadow-sm ${
                           isRTL ? 'ml-3 mr-0' : 'mr-3 ml-0'
                         }`}>
-                          <Image 
-                            src={restaurantData.logo} 
-                            alt={restaurantData.name}
-                            width={32}
-                            height={32}
-                            className="object-cover"
-                          />
+                          {restaurantData.logo ? (
+                            <Image 
+                              src={restaurantData.logo} 
+                              alt={restaurantData.name}
+                              width={32}
+                              height={32}
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+                              <span className="text-white font-bold text-xs">
+                                {restaurantData.name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div>
                           <span className="font-medium">{restaurantData.name}</span>
