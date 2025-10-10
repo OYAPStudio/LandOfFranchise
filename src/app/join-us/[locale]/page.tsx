@@ -1,5 +1,5 @@
-import JoinUsHero from '@/components/sections/join-us/hero';
-import BenefitsSection from '@/components/sections/join-us/benefits';
+import JobsListing from '@/components/sections/join-us/jobs-listing';
+import CareersHero from '@/components/sections/join-us/careers-hero';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -67,10 +67,12 @@ export default async function JoinUsPage({
         </div>
       </header>
 
-      {/* Page Content with Top Padding */}
-      <div className="pt-20">
-        <JoinUsHero locale={locale} />
-        <BenefitsSection locale={locale} />
+      {/* Hero Section */}
+      <CareersHero locale={locale} />
+
+      {/* Jobs Section */}
+      <div id="jobs-section">
+        <JobsListing locale={locale} />
       </div>
     </main>
   );

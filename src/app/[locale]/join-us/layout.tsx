@@ -17,14 +17,14 @@ const cairo = Cairo({
 });
 
 export const metadata = {
-  title: 'Join Our Team - Land of Franchise',
-  description: 'Build your career with Iraq\'s leading restaurant group. Explore exciting opportunities and grow with us.',
+  title: 'Join Our Franchise Network - Land of Franchise',
+  description: 'Partner with Land of Franchise and become part of Iraq\'s fastest-growing restaurant franchise network.',
   icons: {
     icon: '/favicon.ico',
   },
   openGraph: {
-    title: 'Join Our Team - Land of Franchise',
-    description: 'Build your career with Iraq\'s leading restaurant group. Explore exciting opportunities and grow with us.',
+    title: 'Join Our Franchise Network - Land of Franchise',
+    description: 'Partner with Land of Franchise and become part of Iraq\'s fastest-growing restaurant franchise network.',
     url: 'https://landoffranchise.com/join-us',
     siteName: 'Land of Franchise',
     images: [
@@ -32,7 +32,7 @@ export const metadata = {
         url: '/images/logo/LF.png',
         width: 1200,
         height: 630,
-        alt: 'Land of Franchise - Join Our Team',
+        alt: 'Land of Franchise - Join Our Franchise',
       },
     ],
     locale: 'en_US',
